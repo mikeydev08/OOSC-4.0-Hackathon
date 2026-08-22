@@ -7,7 +7,7 @@ import { LandingPage } from './components/LandingPage';
 import { CustomCursor } from './components/CustomCursor';
 import { InteractiveBackground } from './components/InteractiveBackground';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://socratic-ai-tutor-gwot.onrender.com';
 
 export function App() {
   const [view, setView] = useState<'landing' | 'app'>('landing');
