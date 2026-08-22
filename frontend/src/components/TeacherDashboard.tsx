@@ -524,7 +524,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ apiBaseUrl =
                     </div>
                     {log.file_url && (
                       <a
-                        href={`http://localhost:8000${log.file_url}`}
+                        href={`${apiBaseUrl}${log.file_url}`}
                         target="_blank"
                         rel="noreferrer"
                         className="agency-pill"
