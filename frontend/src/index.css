@@ -1,0 +1,536 @@
+/* =====================================================================
+   NOOMO AGENCY INSPIRED DESIGN SYSTEM & LUXURY EDITORIAL AESTHETICS
+   Socratic Physics AI Tutor & Diagnostics Experience
+   ===================================================================== */
+
+@import 'katex/dist/katex.min.css';
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+
+:root {
+  /* Noomo Agency Dark Palette */
+  --bg-black: #08090d;
+  --bg-surface: #0f1118;
+  --bg-card: rgba(18, 20, 29, 0.75);
+  --bg-card-hover: rgba(26, 30, 44, 0.85);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 255, 255, 0.22);
+  --border-glow: rgba(0, 240, 255, 0.4);
+
+  /* Accents & Neons */
+  --neon-cyan: #00f0ff;
+  --neon-purple: #8b5cf6;
+  --neon-lime: #d4ff00;
+  --neon-coral: #ff3366;
+  --neon-emerald: #10b981;
+  --ice-white: #f5f6fa;
+  --text-muted: #8b8f9e;
+  --text-dim: #5c6070;
+
+  /* Typography Stacks */
+  --font-display: 'Syne', sans-serif;
+  --font-tech: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── Global Reset & Body ─── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: var(--bg-black);
+  color: var(--ice-white);
+  font-family: var(--font-body);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-black);
+  color: var(--ice-white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  selection-background-color: var(--neon-cyan);
+  selection-color: var(--bg-black);
+}
+
+::selection {
+  background: var(--neon-cyan);
+  color: #000000;
+}
+
+/* ─── Ambient Noise Texture (Eliminates AI plastic look) ─── */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ─── Ambient Glow Mesh ─── */
+.ambient-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 85% 25%, rgba(0, 240, 255, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 50% 85%, rgba(212, 255, 0, 0.05) 0%, transparent 50%);
+}
+
+/* ─── Typography Utility Classes ─── */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.font-tech {
+  font-family: var(--font-tech);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Big Hero Headline */
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 7.5vw, 6.8rem);
+  font-weight: 800;
+  line-height: 0.92;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  color: var(--ice-white);
+}
+
+.hero-title .outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(245, 246, 250, 0.85);
+  transition: all 0.4s ease;
+}
+
+.hero-title .outline-text:hover {
+  color: var(--neon-cyan);
+  -webkit-text-stroke-color: var(--neon-cyan);
+  text-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+}
+
+/* ─── Glassmorphism & Brutalist Cards ─── */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+}
+
+.glass-card-tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, border-color 0.3s ease;
+}
+
+/* ─── Noomo Agency Pill Badges ─── */
+.agency-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ice-white);
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+
+.agency-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.agency-pill.active {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.agency-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 8px var(--neon-cyan);
+}
+
+/* ─── Magnetic Liquid Buttons ─── */
+.btn-magnetic {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 32px;
+  border-radius: 100px;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  z-index: 1;
+}
+
+.btn-magnetic-primary {
+  background: var(--ice-white);
+  color: var(--bg-black);
+}
+
+.btn-magnetic-primary:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.35);
+}
+
+.btn-magnetic-primary .arrow-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-black);
+  color: var(--ice-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.btn-magnetic-primary:hover .arrow-circle {
+  transform: rotate(45deg);
+}
+
+.btn-magnetic-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ice-white);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+}
+
+.btn-magnetic-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-active);
+  transform: scale(1.04);
+}
+
+/* Secondary & action buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  color: #000000;
+  border: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 240, 255, 0.45);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--ice-white);
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-active);
+}
+
+/* ─── Infinite Marquee Ticker ─── */
+.marquee-container {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  padding: 24px 0;
+  position: relative;
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.marquee-content {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  white-space: nowrap;
+  animation: scroll-marquee 28s linear infinite;
+}
+
+.marquee-content.reverse {
+  animation: scroll-marquee-reverse 28s linear infinite;
+}
+
+.marquee-item {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+  color: var(--ice-white);
+}
+
+.marquee-item .sep {
+  color: var(--neon-cyan);
+  font-size: 1.2rem;
+}
+
+@keyframes scroll-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes scroll-marquee-reverse {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+/* ─── Noomo Award Showcase Rows ─── */
+.showcase-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.showcase-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--neon-cyan);
+  transition: width 0.4s ease;
+}
+
+.showcase-row:hover::before {
+  width: 100%;
+}
+
+.showcase-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+.showcase-row .index-num {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  width: 60px;
+}
+
+.showcase-row .title-area {
+  flex: 1;
+}
+
+.showcase-row .title-main {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ice-white);
+  transition: color 0.3s ease;
+}
+
+.showcase-row:hover .title-main {
+  color: var(--neon-cyan);
+}
+
+.showcase-row .category-tag {
+  font-family: var(--font-tech);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.showcase-row .arrow-action {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ice-white);
+  transition: all 0.3s ease;
+}
+
+.showcase-row:hover .arrow-action {
+  background: var(--neon-cyan);
+  color: var(--bg-black);
+  border-color: var(--neon-cyan);
+  transform: rotate(45deg);
+}
+
+/* ─── Custom Magnetic Cursor Styles ─── */
+.custom-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--neon-cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease, width 0.3s ease, height 0.3s ease, background 0.3s ease;
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.custom-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              height 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.3s ease,
+              background 0.3s ease;
+}
+
+.custom-cursor-ring.hovered {
+  width: 72px;
+  height: 72px;
+  background: rgba(0, 240, 255, 0.1);
+  border-color: var(--neon-cyan);
+  backdrop-filter: blur(4px);
+}
+
+.custom-cursor-ring.text-mode {
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (pointer: coarse) {
+  .custom-cursor-dot, .custom-cursor-ring {
+    display: none !important;
+  }
+}
+
+/* ─── Scrollbar Luxury Styling ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+}
+
+/* ─── Subtle Keyframe Micro-Animations ─── */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+.animate-float {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+.animate-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
