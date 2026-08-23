@@ -1022,7 +1022,10 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => {
-                      setUserText("Can you explain why this formula is used in simpler words?");
+                      const contextTopic = selectedPreset && activePresets[selectedPreset]
+                        ? `${activePresets[selectedPreset].subject} (${activePresets[selectedPreset].title?.replace(/^[^\w\s]+/, '').trim()})`
+                        : `${subjectName}`;
+                      setUserText(`Can you explain the key ${contextTopic} concept in simpler, intuitive points?`);
                     }}
                     className="agency-pill"
                     style={{ fontSize: '0.66rem', cursor: 'pointer', background: 'rgba(255,255,255,0.04)' }}
@@ -1031,7 +1034,10 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                   </button>
                   <button
                     onClick={() => {
-                      setUserText("What is the next calculation step I should perform?");
+                      const contextTopic = selectedPreset && activePresets[selectedPreset]
+                        ? `${activePresets[selectedPreset].subject} (${activePresets[selectedPreset].title?.replace(/^[^\w\s]+/, '').trim()})`
+                        : `${subjectName}`;
+                      setUserText(`What is the exact next step to solve this ${contextTopic} problem?`);
                     }}
                     className="agency-pill"
                     style={{ fontSize: '0.66rem', cursor: 'pointer', background: 'rgba(255,255,255,0.04)' }}

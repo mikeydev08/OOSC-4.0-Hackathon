@@ -240,79 +240,69 @@ def call_gemini(prompt: str, image_data: Optional[str] = None, preferred_model: 
 
         if "integral" in p_l or "x^4" in p_l or "x^2" in p_l or "split" in p_l or "rational" in p_l or "irreducible" in p_l:
             return (
-                "• Integrals involving symmetric polynomial fractions like $\\int \\frac{x^2 + 1}{x^4 + 1}\\,dx$ are solved by dividing both numerator and denominator by $x^2$.\n"
-                "• This transforms the integrand into $\\frac{1 + 1/x^2}{x^2 + 1/x^2}$, where the numerator is the exact derivative of the expression $u = x - \\frac{1}{x}$.\n"
-                "• Completing the square in the denominator expresses $x^2 + \\frac{1}{x^2}$ as $\\left(x - \\frac{1}{x}\\right)^2 + 2$, converting the integral into standard form $\\int \\frac{du}{u^2 + (\\sqrt{2})^2}$.\n"
-                "• Applying the standard arctan antiderivative $\\frac{1}{a}\\tan^{-1}\\left(\\frac{u}{a}\\right)$, what is the complete antiderivative in terms of the original variable $x$?"
+                "• In evaluating $\\int \\frac{x^2 + 1}{x^4 + 1}\\,dx$, dividing numerator and denominator by $x^2$ gives $\\frac{1 + 1/x^2}{x^2 + 1/x^2}$.\n"
+                "• The numerator $(1 + 1/x^2)\\,dx$ is the exact derivative of $u = x - \\frac{1}{x}$, while the denominator completes the square as $u^2 + (\\sqrt{2})^2$.\n"
+                "• Applying the standard integral $\\int \\frac{du}{u^2 + a^2} = \\frac{1}{a}\\tan^{-1}\\left(\\frac{u}{a}\\right)$, what is the final antiderivative in terms of $x$?"
             )
         elif "tan^-1" in p_l or "arctan" in p_l or "cos x - sin x" in p_l or "inverse trig" in p_l:
             return (
-                "• Differentiating expressions like $y = \\tan^{-1}\\left(\\frac{\\cos x - \\sin x}{\\cos x + \\sin x}\\right)$ directly via chain and quotient rules is tedious and error-prone.\n"
-                "• Dividing both numerator and denominator inside the argument by $\\cos x$ gives $\\frac{1 - \\tan x}{1 + \\tan x}$, which is the trigonometric identity for $\\tan\\left(\\frac{\\pi}{4} - x\\right)$.\n"
-                "• Because $\\tan^{-1}(\\tan \\theta) = \\theta$, the entire function simplifies drastically to the linear expression $y = \\frac{\\pi}{4} - x$.\n"
-                "• Taking the derivative of this simplified expression, what is the final value of $\\frac{dy}{dx}$?"
+                "• Dividing numerator and denominator by $\\cos x$ simplifies $\\frac{\\cos x - \\sin x}{\\cos x + \\sin x}$ to $\\frac{1 - \\tan x}{1 + \\tan x} = \\tan\\left(\\frac{\\pi}{4} - x\\right)$.\n"
+                "• Because $\\tan^{-1}(\\tan \\theta) = \\theta$, the entire function simplifies directly to the linear expression $y = \\frac{\\pi}{4} - x$.\n"
+                "• Taking the derivative of this simplified expression with respect to $x$, what is the value of $\\frac{dy}{dx}$?"
             )
         elif "redox" in p_l or "oxidation" in p_l or "cr2o7" in p_l or "dichromate" in p_l or "k2cr2o7" in p_l or "chromium" in p_l:
             return (
-                "• In any neutral chemical compound like Potassium Dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), the sum of all oxidation numbers across all constituent atoms must equal zero.\n"
-                "• Group 1 alkali metals like Potassium ($\\text{K}$) always possess an oxidation state of $+1$, while Oxygen typically exhibits an oxidation state of $-2$ in non-peroxide compounds.\n"
-                "• Setting up the charge balance equation gives $2(+1) + 2(x) + 7(-2) = 0$, which simplifies to $2 + 2x - 14 = 0 \\implies 2x = +12$.\n"
-                "• Since there are 2 Chromium atoms sharing the $+12$ oxidation state, what is the oxidation number of each individual Chromium atom?"
+                "• In Potassium Dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), the total sum of oxidation states across all atoms equals zero: $2(+1) + 2(x) + 7(-2) = 0$.\n"
+                "• Simplifying gives $+2 + 2x - 14 = 0 \\implies 2x = +12$, which represents the combined oxidation state shared across the two Chromium atoms.\n"
+                "• Dividing $+12$ by 2 gives the oxidation number for each individual Chromium atom. What is the value of $x$?"
             )
         elif "nernst" in p_l or "galvanic" in p_l or "ag+" in p_l or "zn2+" in p_l or "e_cell" in p_l or "e0_cell" in p_l:
             return (
-                "• In electrochemistry, the Nernst equation calculates cell potential under non-standard conditions using the formula $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
-                "• In the overall cell reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2 with $n = 2$ electrons transferred.\n"
-                "• The reaction quotient $Q$ must raise each dissolved ion's concentration to the power of its stoichiometric coefficient, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, rather than a simple linear ratio.\n"
-                "• How does squaring the silver ion concentration in the denominator affect the logarithm term and your final calculation of $E_{\\text{cell}}$?"
+                "• Under non-standard conditions, the Nernst equation is $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
+                "• For the balanced reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$.\n"
+                "• What value of $Q$ do you obtain when substituting $[\\text{Zn}^{2+}] = 0.1\\text{ M}$ and $[\\text{Ag}^+] = 0.01\\text{ M}$?"
             )
         elif "dna" in p_l or "base pair" in p_l or "adenine" in p_l or "guanine" in p_l or "repair" in p_l or "inheritance" in p_l or "chargaff" in p_l:
             return (
-                "• DNA replication and repair fidelity depend on Chargaff's rules of complementary base pairing, where Adenine specifically pairs with Thymine via 2 hydrogen bonds ($A=T$) and Guanine pairs with Cytosine via 3 hydrogen bonds ($G\\equiv C$).\n"
-                "• The two strands in double-stranded DNA are antiparallel: one strand runs in the $5' \\rightarrow 3'$ orientation while its complementary partner runs in the $3' \\rightarrow 5'$ direction.\n"
-                "• During repair excision, DNA Polymerase reads the intact template strand and inserts the exact complementary nucleotide triphosphate to restore sequence integrity.\n"
-                "• When checking a reconstructed sequence, how does verifying both the base-pairing rule and antiparallel orientation ensure genetic fidelity?"
+                "• DNA replication fidelity follows Chargaff's rules where Adenine pairs with Thymine ($A=T$) and Guanine pairs with Cytosine ($G\\equiv C$).\n"
+                "• The opposing DNA strands run in antiparallel directions: $5' \\rightarrow 3'$ paired with $3' \\rightarrow 5'$.\n"
+                "• During repair excision, how does verifying both complementary base pairing and antiparallel orientation ensure the damaged segment is accurately reconstructed?"
             )
         elif "lac" in p_l or "operon" in p_l or "repressor" in p_l or "allolactose" in p_l:
             return (
-                "• The Lac Operon is an inducible operon in *E. coli* that coordinates the transport and enzymatic breakdown of lactose through genes $lacZ$, $lacY$, and $lacA$.\n"
-                "• In the absence of lactose, the active Lac Repressor protein (encoded by the regulatory $i$ gene) binds tightly to the operator region ($O$), physically blocking RNA Polymerase from transcribing the structural genes.\n"
-                "• When lactose is introduced, its isomer allolactose acts as an inducer by binding to the repressor, causing a conformational change that releases it from the operator.\n"
-                "• What happens to the transcription of $\\beta$-galactosidase once RNA Polymerase is free to bind the promoter and move through the structural genes?"
+                "• The Lac Operon regulates lactose transport and breakdown via structural genes $lacZ$, $lacY$, and $lacA$.\n"
+                "• In the absence of lactose, the repressor protein binds to the operator ($O$) to block RNA Polymerase; when lactose is added, inducer allolactose binds and releases the repressor.\n"
+                "• Once the operator is unblocked, what enzyme is now free to bind the promoter and transcribe the structural genes?"
             )
         elif "photosynthesis" in p_l or "calvin" in p_l or "z-scheme" in p_l or "chlorophyll" in p_l or "thylakoid" in p_l:
             return (
-                "• The light-dependent reactions of photosynthesis in the thylakoid membrane occur through two distinct electron transport pathways: Cyclic and Non-Cyclic Photophosphorylation.\n"
-                "• Cyclic photophosphorylation involves only Photosystem I (PS-I / P700) and exclusively synthesizes $\\text{ATP}$ without photolysis of water or production of $\\text{NADPH}$.\n"
-                "• The light-independent Calvin cycle requires both chemical energy in $\\text{ATP}$ and reducing power from $\\text{NADPH}$ to reduce $\\text{CO}_2$ into phosphoglyceraldehyde ($3\\text{-PGA}$) and glucose.\n"
-                "• Why is non-cyclic photophosphorylation (the Z-scheme involving both PS-II and PS-I) essential for sustaining complete carbohydrate synthesis in plants?"
+                "• Cyclic photophosphorylation involves only PS-I (700 nm) in the stroma lamellae and produces exclusively $\\text{ATP}$.\n"
+                "• Non-cyclic photophosphorylation (the Z-scheme involving PS-II and PS-I) produces both $\\text{ATP}$ and reducing power $\\text{NADPH}$ for the Calvin cycle.\n"
+                "• Why is non-cyclic photophosphorylation necessary to enable carbon dioxide fixation into sugars?"
             )
         elif "lcr" in p_l or "inductor" in p_l or "capacitor" in p_l or "30v" in p_l or "phasor" in p_l or "80v" in p_l or "40v" in p_l or "150v" in p_l:
             return (
-                "• In a series AC circuit, voltages across reactive components do not simply add arithmetically because inductor voltage ($V_L$) and capacitor voltage ($V_C$) are $180^\\circ$ out of phase with each other.\n"
-                "• The inductor voltage leads current by $+90^\\circ$ while capacitor voltage lags by $-90^\\circ$, causing their opposite vectors to subtract: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
-                "• The resistor voltage $V_R$ is in phase with current, making it perpendicular to the net reactive voltage on a phasor diagram. Therefore, the net source voltage is given by the vector sum $V_{\\text{net}} = \\sqrt{V_R^2 + (V_L - V_C)^2}$.\n"
-                "• What total voltage do you get when substituting $V_R = 30\\text{V}$ and net reactive voltage $40\\text{V}$ into $\\sqrt{30^2 + 40^2}$?"
+                "• In a series AC circuit, voltages across inductor ($V_L$) and capacitor ($V_C$) are $180^\\circ$ out of phase: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
+                "• Because resistor voltage $V_R$ is perpendicular to net reactive voltage on a phasor diagram, total voltage is the vector sum $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$, not simple algebraic addition.\n"
+                "• What source voltage do you get when evaluating $V = \\sqrt{30^2 + 40^2}$?"
             )
         elif "wave" in p_l or "ydse" in p_l or "mica" in p_l or "fringe" in p_l:
             return (
-                "• In Young's Double Slit Experiment (YDSE), inserting a thin mica sheet of thickness $t$ and refractive index $\\mu$ in front of one slit introduces an extra optical path difference of $(\\mu - 1)t$.\n"
-                "• This extra path difference causes the entire interference fringe pattern to shift laterally across the screen by a distance $\\Delta y = \\frac{D}{d}(\\mu - 1)t$, but it does not change the physical slit spacing $d$ or the light wavelength $\\lambda$.\n"
-                "• The fringe width $\\beta$ is strictly governed by the formula $\\beta = \\frac{\\lambda D}{d}$. Since none of the parameters $\\lambda$, $D$, or $d$ have changed, the fringe width itself remains completely unchanged.\n"
-                "• To complete your understanding, why does introducing the sheet shift the position of the central maximum rather than expanding or compressing the spacing between fringes?"
+                "• Introducing a mica sheet of thickness $t$ and refractive index $\\mu$ adds path difference $(\\mu - 1)t$, causing a lateral fringe shift $\\Delta y = \\frac{D}{d}(\\mu - 1)t$.\n"
+                "• The fringe width is strictly defined as $\\beta = \\frac{\\lambda D}{d}$. Because slit spacing $d$ and wavelength $\\lambda$ remain unchanged, the fringe width $\\beta$ does not change.\n"
+                "• Why does introducing the sheet shift the entire pattern as a whole without altering the spacing between adjacent fringes?"
             )
         elif "mirror" in p_l or "concave" in p_l or "15cm" in p_l or "lens" in p_l or "focal" in p_l:
             return (
-                "• Under NCERT Cartesian Sign Convention, all distances are measured from the Pole ($P$) of the mirror as origin $(0,0)$, and distances measured opposite to incoming light (to the left) are strictly negative.\n"
-                "• Because a concave mirror converges incoming parallel rays in front of its reflective surface, its focal length is always negative ($f = -10\\text{ cm}$), and the object placed in front is at $u = -15\\text{ cm}$.\n"
-                "• Applying these negative values into the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ prevents sign errors that would otherwise falsely produce a virtual image.\n"
-                "• What is the value of image distance $v$ when you evaluate $\\frac{1}{v} = \\frac{1}{-10} - \\frac{1}{-15}$?"
+                "• Under NCERT Cartesian Sign Convention, distances measured against incoming light (left of Pole $P$) are negative: $u = -15\\text{ cm}$ and $f = -10\\text{ cm}$.\n"
+                "• Applying these values into the mirror formula gives $\\frac{1}{-10} = \\frac{1}{v} + \\frac{1}{-15}$.\n"
+                "• Solving for $v = \\frac{1}{\\frac{1}{-10} - \\frac{1}{-15}}$, what is the position and nature of the image formed?"
             )
         else:
             return (
-                "• Let's analyze the foundational physical laws and governing NCERT equations that connect the given quantities.\n"
-                "• Compare the given parameters with standard formulas to identify the exact relationships between the known variables.\n"
-                "• By substituting the given values with their proper signs into the primary formula, what is the first mathematical step to solve this problem?"
+                "• Let's identify the governing NCERT principle and formulas that connect the known variables in this problem.\n"
+                "• Check the given parameters and verify proper mathematical signs and stoichiometric relations before calculating.\n"
+                "• By substituting the given values into the primary formula, what is the first step you should write down?"
             )
     elif "grader" in prompt.lower() or "evaluate" in prompt.lower():
         return json.dumps({"is_valid": True, "reason": "Retrieved NCERT context covers STEM concept."})
@@ -669,101 +659,91 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
         prompt = (
             f"You are a master NCERT Socratic STEM Tutor for {grade_str} {subj_str}.\n"
             f"Student Problem / Submission: '{extracted_text}'\n"
-            f"Diagnosed Misconception / Gap: '{error or 'Understand the underlying scientific principles and derivation'}'\n"
+            f"Diagnosed Misconception / Gap: '{error or 'Understand the core underlying scientific principle'}'\n"
             f"Textbook Topic: '{chap_str}'\n\n"
-            "PEDAGOGICAL INSTRUCTIONS (INFORMATIVE & IN-DEPTH BULLET POINTS):\n"
-            "1. Provide a detailed, thoroughly informative conceptual explanation broken into 3 to 4 clear bullet points (using '•').\n"
-            "2. DO NOT use rigid category labels (DO NOT write '**Key Concept**:', '**Helpful Clue**:', '**Next Step**:', etc.). Let each bullet flow naturally as a rich, explanatory insight.\n"
-            "3. First explain the exact scientific/mathematical principles, laws, and underlying physics/chemistry/biology.\n"
-            "4. Clearly explain why the common misconception or incorrect calculation breaks down, with reference to the exact formula in LaTeX math (e.g. $\\beta = \\frac{\\lambda D}{d}$, $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$).\n"
-            "5. End with a constructive guiding thought or step that prompts the student to work through the final calculation themselves.\n"
-            "6. Make the explanation comprehensive, engaging, and in-depth. Do NOT make it overly brief or generic.\n"
+            "PEDAGOGICAL INSTRUCTIONS (CONCISE, FOCUSED ON REQUIRED CONCEPTS ONLY):\n"
+            "1. Output exactly 3 concise, intuitive bullet points (using '•').\n"
+            "2. DO NOT use artificial headers like '**Key Concept**:', '**Helpful Clue**:', '**Next Step**:'. Write each bullet directly.\n"
+            "3. Bullet 1: State the exact governing law, definition, or LaTeX formula needed for this problem.\n"
+            "4. Bullet 2: Directly point out where the student's assumption breaks down and explain the exact relationship simply.\n"
+            "5. Bullet 3: Provide a clear, direct guiding question or step that leads the student to the final numerical or logical answer.\n"
+            "6. Keep the answer balanced: concise, crystal-clear, focused ONLY on the required concepts without extra unnecessary theory.\n"
             "7. Do NOT include any '(Ref: ...)' citation tags.\n"
         )
 
         try:
-            final_response = call_gemini(prompt, preferred_model="gemini-2.5-flash")
+            final_response = call_gemini(prompt, preferred_model="gemini-3.1-flash-lite")
             if final_response.startswith("{") and "intent_type" in final_response:
                 raise ValueError("JSON returned instead of text")
             final_response = re.sub(r'\(Ref:[^)]+\)', '', final_response).strip()
         except Exception:
-            # Dynamic conceptual fallback based on question domain (Rich, detailed, informative bullet points)
+            # Dynamic conceptual fallback based on question domain (Concise, balanced 3 bullet points)
             txt_l = (extracted_text + " " + (error or "")).lower()
             if "redox" in txt_l or "oxidation" in txt_l or "cr2o7" in txt_l or "dichromate" in txt_l or "k2cr2o7" in txt_l or "chromium" in txt_l:
                 q = (
-                    "• In any neutral chemical compound like Potassium Dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), the sum of all oxidation numbers across all constituent atoms must equal zero.\n"
-                    "• Group 1 alkali metals like Potassium ($\\text{K}$) always possess an oxidation state of $+1$, while Oxygen typically exhibits an oxidation state of $-2$ in non-peroxide compounds.\n"
-                    "• Setting up the charge balance equation gives $2(+1) + 2(x) + 7(-2) = 0$, which simplifies to $2 + 2x - 14 = 0 \\implies 2x = +12$.\n"
-                    "• Since there are 2 Chromium atoms sharing the $+12$ oxidation state, what is the oxidation number of each individual Chromium atom?"
+                    "• In Potassium Dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), the total sum of oxidation states across all atoms equals zero: $2(+1) + 2(x) + 7(-2) = 0$.\n"
+                    "• Simplifying gives $+2 + 2x - 14 = 0 \\implies 2x = +12$, which represents the combined oxidation state shared across the two Chromium atoms.\n"
+                    "• Dividing $+12$ by 2 gives the oxidation number for each individual Chromium atom. What is the value of $x$?"
                 )
             elif "nernst" in txt_l or "galvanic" in txt_l or "ag+" in txt_l or "zn2+" in txt_l or "e_cell" in txt_l or "e0_cell" in txt_l:
                 q = (
-                    "• In electrochemistry, the Nernst equation calculates cell potential under non-standard conditions using the formula $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
-                    "• In the overall cell reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2 with $n = 2$ electrons transferred.\n"
-                    "• The reaction quotient $Q$ must raise each dissolved ion's concentration to the power of its stoichiometric coefficient, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, rather than a simple linear ratio.\n"
-                    "• How does squaring the silver ion concentration in the denominator affect the logarithm term and your final calculation of $E_{\\text{cell}}$?"
+                    "• Under non-standard conditions, the Nernst equation is $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
+                    "• For the balanced reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$.\n"
+                    "• What value of $Q$ do you obtain when substituting $[\\text{Zn}^{2+}] = 0.1\\text{ M}$ and $[\\text{Ag}^+] = 0.01\\text{ M}$?"
                 )
             elif "dna" in txt_l or "base pair" in txt_l or "adenine" in txt_l or "guanine" in txt_l or "repair" in txt_l or "inheritance" in txt_l or "chargaff" in txt_l:
                 q = (
-                    "• DNA replication and repair fidelity depend on Chargaff's rules of complementary base pairing, where Adenine specifically pairs with Thymine via 2 hydrogen bonds ($A=T$) and Guanine pairs with Cytosine via 3 hydrogen bonds ($G\\equiv C$).\n"
-                    "• The two strands in double-stranded DNA are antiparallel: one strand runs in the $5' \\rightarrow 3'$ orientation while its complementary partner runs in the $3' \\rightarrow 5'$ direction.\n"
-                    "• During repair excision, DNA Polymerase reads the intact template strand and inserts the exact complementary nucleotide triphosphate to restore sequence integrity.\n"
-                    "• When checking a reconstructed sequence, how does verifying both the base-pairing rule and antiparallel orientation ensure genetic fidelity?"
+                    "• DNA replication fidelity follows Chargaff's rules where Adenine pairs with Thymine ($A=T$) and Guanine pairs with Cytosine ($G\\equiv C$).\n"
+                    "• The opposing DNA strands run in antiparallel directions: $5' \\rightarrow 3'$ paired with $3' \\rightarrow 5'$.\n"
+                    "• During repair excision, how does verifying both complementary base pairing and antiparallel orientation ensure the damaged segment is accurately reconstructed?"
                 )
             elif "lac" in txt_l or "operon" in txt_l or "repressor" in txt_l or "allolactose" in txt_l:
                 q = (
-                    "• The Lac Operon is an inducible operon in *E. coli* that coordinates the transport and enzymatic breakdown of lactose through genes $lacZ$, $lacY$, and $lacA$.\n"
-                    "• In the absence of lactose, the active Lac Repressor protein (encoded by the regulatory $i$ gene) binds tightly to the operator region ($O$), physically blocking RNA Polymerase from transcribing the structural genes.\n"
-                    "• When lactose is introduced, its isomer allolactose acts as an inducer by binding to the repressor, causing a conformational change that releases it from the operator.\n"
-                    "• What happens to the transcription of $\\beta$-galactosidase once RNA Polymerase is free to bind the promoter and move through the structural genes?"
+                    "• The Lac Operon regulates lactose transport and breakdown via structural genes $lacZ$, $lacY$, and $lacA$.\n"
+                    "• In the absence of lactose, the repressor protein binds to the operator ($O$) to block RNA Polymerase; when lactose is added, inducer allolactose binds and releases the repressor.\n"
+                    "• Once the operator is unblocked, what enzyme is now free to bind the promoter and transcribe the structural genes?"
                 )
             elif "photosynthesis" in txt_l or "calvin" in txt_l or "z-scheme" in txt_l or "chlorophyll" in txt_l or "thylakoid" in txt_l:
                 q = (
-                    "• The light-dependent reactions of photosynthesis in the thylakoid membrane occur through two distinct electron transport pathways: Cyclic and Non-Cyclic Photophosphorylation.\n"
-                    "• Cyclic photophosphorylation involves only Photosystem I (PS-I / P700) and exclusively synthesizes $\\text{ATP}$ without photolysis of water or production of $\\text{NADPH}$.\n"
-                    "• The light-independent Calvin cycle requires both chemical energy in $\\text{ATP}$ and reducing power from $\\text{NADPH}$ to reduce $\\text{CO}_2$ into phosphoglyceraldehyde ($3\\text{-PGA}$) and glucose.\n"
-                    "• Why is non-cyclic photophosphorylation (the Z-scheme involving both PS-II and PS-I) essential for sustaining complete carbohydrate synthesis in plants?"
+                    "• Cyclic photophosphorylation involves only PS-I (700 nm) in the stroma lamellae and produces exclusively $\\text{ATP}$.\n"
+                    "• Non-cyclic photophosphorylation (the Z-scheme involving PS-II and PS-I) produces both $\\text{ATP}$ and reducing power $\\text{NADPH}$ for the Calvin cycle.\n"
+                    "• Why is non-cyclic photophosphorylation necessary to enable carbon dioxide fixation into sugars?"
                 )
             elif "integral" in txt_l or "x^4" in txt_l or "rational" in txt_l or "substitution" in txt_l or "calculus" in txt_l:
                 q = (
-                    "• Integrals involving symmetric polynomial fractions like $\\int \\frac{x^2 + 1}{x^4 + 1}\\,dx$ are solved by dividing both numerator and denominator by $x^2$.\n"
-                    "• This transforms the integrand into $\\frac{1 + 1/x^2}{x^2 + 1/x^2}$, where the numerator is the exact derivative of the expression $u = x - \\frac{1}{x}$.\n"
-                    "• Completing the square in the denominator expresses $x^2 + \\frac{1}{x^2}$ as $\\left(x - \\frac{1}{x}\\right)^2 + 2$, converting the integral into standard form $\\int \\frac{du}{u^2 + (\\sqrt{2})^2}$.\n"
-                    "• Applying the standard arctan antiderivative $\\frac{1}{a}\\tan^{-1}\\left(\\frac{u}{a}\\right)$, what is the complete antiderivative in terms of the original variable $x$?"
+                    "• In evaluating $\\int \\frac{x^2 + 1}{x^4 + 1}\\,dx$, dividing numerator and denominator by $x^2$ gives $\\frac{1 + 1/x^2}{x^2 + 1/x^2}$.\n"
+                    "• The numerator $(1 + 1/x^2)\\,dx$ is the exact derivative of $u = x - \\frac{1}{x}$, while the denominator completes the square as $u^2 + (\\sqrt{2})^2$.\n"
+                    "• Applying the standard integral $\\int \\frac{du}{u^2 + a^2} = \\frac{1}{a}\\tan^{-1}\\left(\\frac{u}{a}\\right)$, what is the final antiderivative in terms of $x$?"
                 )
             elif "tan^-1" in txt_l or "cos x - sin x" in txt_l or "inverse trig" in txt_l:
                 q = (
-                    "• Differentiating expressions like $y = \\tan^{-1}\\left(\\frac{\\cos x - \\sin x}{\\cos x + \\sin x}\\right)$ directly via chain and quotient rules is tedious and error-prone.\n"
-                    "• Dividing both numerator and denominator inside the argument by $\\cos x$ gives $\\frac{1 - \\tan x}{1 + \\tan x}$, which is the trigonometric identity for $\\tan\\left(\\frac{\\pi}{4} - x\\right)$.\n"
-                    "• Because $\\tan^{-1}(\\tan \\theta) = \\theta$, the entire function simplifies drastically to the linear expression $y = \\frac{\\pi}{4} - x$.\n"
-                    "• Taking the derivative of this simplified expression, what is the final value of $\\frac{dy}{dx}$?"
+                    "• Dividing numerator and denominator by $\\cos x$ simplifies $\\frac{\\cos x - \\sin x}{\\cos x + \\sin x}$ to $\\frac{1 - \\tan x}{1 + \\tan x} = \\tan\\left(\\frac{\\pi}{4} - x\\right)$.\n"
+                    "• Because $\\tan^{-1}(\\tan \\theta) = \\theta$, the entire function simplifies directly to the linear expression $y = \\frac{\\pi}{4} - x$.\n"
+                    "• Taking the derivative of this simplified expression with respect to $x$, what is the value of $\\frac{dy}{dx}$?"
                 )
             elif "lcr" in txt_l or "inductor" in txt_l or "capacitor" in txt_l or "30v" in txt_l or "phasor" in txt_l or "80v" in txt_l or "40v" in txt_l:
                 q = (
-                    "• In a series AC circuit, voltages across reactive components do not simply add arithmetically because inductor voltage ($V_L$) and capacitor voltage ($V_C$) are $180^\\circ$ out of phase with each other.\n"
-                    "• The inductor voltage leads current by $+90^\\circ$ while capacitor voltage lags by $-90^\\circ$, causing their opposite vectors to subtract: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
-                    "• The resistor voltage $V_R$ is in phase with current, making it perpendicular to the net reactive voltage on a phasor diagram. Therefore, the net source voltage is given by the vector sum $V_{\\text{net}} = \\sqrt{V_R^2 + (V_L - V_C)^2}$.\n"
-                    "• What total voltage do you get when substituting $V_R = 30\\text{V}$ and net reactive voltage $40\\text{V}$ into $\\sqrt{30^2 + 40^2}$?"
+                    "• In a series AC circuit, voltages across inductor ($V_L$) and capacitor ($V_C$) are $180^\\circ$ out of phase: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
+                    "• Because resistor voltage $V_R$ is perpendicular to net reactive voltage on a phasor diagram, total voltage is the vector sum $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$, not simple algebraic addition.\n"
+                    "• What source voltage do you get when evaluating $V = \\sqrt{30^2 + 40^2}$?"
                 )
             elif "wave" in txt_l or "ydse" in txt_l or "mica" in txt_l or "fringe" in txt_l:
                 q = (
-                    "• In Young's Double Slit Experiment (YDSE), inserting a thin mica sheet of thickness $t$ and refractive index $\\mu$ in front of one slit introduces an extra optical path difference of $(\\mu - 1)t$.\n"
-                    "• This extra path difference causes the entire interference fringe pattern to shift laterally across the screen by a distance $\\Delta y = \\frac{D}{d}(\\mu - 1)t$, but it does not change the physical slit spacing $d$ or the light wavelength $\\lambda$.\n"
-                    "• The fringe width $\\beta$ is strictly governed by the formula $\\beta = \\frac{\\lambda D}{d}$. Since none of the parameters $\\lambda$, $D$, or $d$ have changed, the fringe width itself remains completely unchanged.\n"
-                    "• To complete your understanding, why does introducing the sheet shift the position of the central maximum rather than expanding or compressing the spacing between fringes?"
+                    "• Introducing a mica sheet of thickness $t$ and refractive index $\\mu$ adds path difference $(\\mu - 1)t$, causing a lateral fringe shift $\\Delta y = \\frac{D}{d}(\\mu - 1)t$.\n"
+                    "• The fringe width is strictly defined as $\\beta = \\frac{\\lambda D}{d}$. Because slit spacing $d$ and wavelength $\\lambda$ remain unchanged, the fringe width $\\beta$ does not change.\n"
+                    "• Why does introducing the sheet shift the entire pattern as a whole without altering the spacing between adjacent fringes?"
                 )
             elif "mirror" in txt_l or "concave mirror" in txt_l or "convex mirror" in txt_l or "lens" in txt_l or "focal length" in txt_l:
                 q = (
-                    "• Under NCERT Cartesian Sign Convention, all distances are measured from the Pole ($P$) of the mirror as origin $(0,0)$, and distances measured opposite to incoming light (to the left) are strictly negative.\n"
-                    "• Because a concave mirror converges incoming parallel rays in front of its reflective surface, its focal length is always negative ($f = -10\\text{ cm}$), and the object placed in front is at $u = -15\\text{ cm}$.\n"
-                    "• Applying these negative values into the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ prevents sign errors that would otherwise falsely produce a virtual image.\n"
-                    "• What is the value of image distance $v$ when you evaluate $\\frac{1}{v} = \\frac{1}{-10} - \\frac{1}{-15}$?"
+                    "• Under NCERT Cartesian Sign Convention, distances measured against incoming light (left of Pole $P$) are negative: $u = -15\\text{ cm}$ and $f = -10\\text{ cm}$.\n"
+                    "• Applying these values into the mirror formula gives $\\frac{1}{-10} = \\frac{1}{v} + \\frac{1}{-15}$.\n"
+                    "• Solving for $v = \\frac{1}{\\frac{1}{-10} - \\frac{1}{-15}}$, what is the position and nature of the image formed?"
                 )
             else:
                 q = (
-                    f"• Let's analyze the foundational physical laws and governing NCERT equations for {chap_str}.\n"
-                    "• Compare the given parameters with standard formulas to identify the exact relationships between the known variables.\n"
-                    "• By substituting the given values with their proper signs into the primary formula, what is the first mathematical step to solve this problem?"
+                    f"• Let's identify the governing NCERT principle and formulas for {chap_str}.\n"
+                    "• Check the given parameters and verify proper mathematical signs and stoichiometric relations before calculating.\n"
+                    "• By substituting the given values into the primary formula, what is the first step you should write down?"
                 )
             final_response = q.strip()
 
