@@ -499,15 +499,14 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
             "   - Sentence 2: Ask a clear guiding question that points them directly toward the right calculation or formula (e.g. 'What sign should you give to $f$ in the formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$?').\n"
             "3. DO NOT give away the final numerical solution.\n"
             "4. Format key variables and formulas in clean LaTeX math (e.g. $f = -10\\text{ cm}$, $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$).\n"
-            f"5. Include this exact citation at the end: {citation}\n"
+            "5. Output ONLY the clear explanation and question. Do NOT add any citation, reference, or (Ref: ...) tags.\n"
         )
 
         try:
             final_response = call_gemini(prompt, preferred_model="gemini-2.5-flash")
             if final_response.startswith("{") and "intent_type" in final_response:
                 raise ValueError("JSON returned instead of text")
-            if citation not in final_response:
-                final_response += f" {citation}"
+            final_response = re.sub(r'\(Ref:[^)]+\)', '', final_response).strip()
         except Exception:
             # Dynamic conceptual fallback based on question domain (Simple, friendly, step-by-step)
             txt_l = (extracted_text + " " + (error or "")).lower()
@@ -531,7 +530,7 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
                 q = "In the Lac Operon, the repressor protein naturally blocks RNA polymerase when lactose is absent. What happens to the repressor when allolactose binds to it as an inducer?"
             else:
                 q = f"Take a look at the given values in {chap_str}. Which standard formula connects these quantities, and what is the first step you should take?"
-            final_response = f"{q} {citation}".strip()
+            final_response = q.strip()
 
     logs.append({
         "step": 5,
@@ -539,13 +538,13 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
         "status": "completed",
         "details": {
             "response": final_response,
-            "citation": citation
+            "citation": ""
         }
     })
 
     return {
         "socratic_response": final_response,
-        "citation": citation,
+        "citation": "",
         "trace_logs": logs
     }
 

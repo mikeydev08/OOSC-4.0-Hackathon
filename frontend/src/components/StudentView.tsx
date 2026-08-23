@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, RefreshCw, BookOpen, AlertCircle, Volume2, FileText, User, BookMarked, GraduationCap, ArrowUpRight, Eye, EyeOff, Sparkles, Pause, Play, Square } from 'lucide-react';
+import { Upload, RefreshCw, AlertCircle, Volume2, FileText, User, BookMarked, GraduationCap, ArrowUpRight, Eye, EyeOff, Sparkles, Pause, Play, Square } from 'lucide-react';
 import { MCQQuizModule } from './MCQQuizModule';
 import { MathText } from './MathText';
 import { ThinkingEngine } from './ThinkingEngine';
@@ -61,7 +61,6 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
       id: 'init_1',
       sender: 'tutor',
       text: 'Welcome to your Socratic STEM AI Workspace. Type any problem or upload a handwritten assignment—Subject & Grade will auto-detect automatically!',
-      citation: '(Ref: NCERT Curriculum — Classes 10, 11 & 12)',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -862,34 +861,34 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                       </div>
                     )}
 
-                    <div style={{ fontSize: '1.14rem', color: 'var(--ice-white)', lineHeight: 1.55, fontWeight: 600, marginBottom: '18px' }}>
-                      "<MathText text={msg.text} />"
-                    </div>
+                    {(() => {
+                      const cleanMsgText = (msg.text || '').replace(/\(Ref:[^)]+\)/gi, '').trim();
+                      return (
+                        <>
+                          <div style={{ fontSize: '1.14rem', color: 'var(--ice-white)', lineHeight: 1.55, fontWeight: 600, marginBottom: '18px' }}>
+                            "<MathText text={cleanMsgText} />"
+                          </div>
 
-                    {/* Interactive Conceptual Visual Diagram Blueprint */}
-                    <ConceptualVisualizer
-                      text={msg.text}
-                      conceptualError={msg.conceptual_error}
-                      subject={subjectName}
-                      grade={classGrade}
-                    />
+                          {/* Interactive Conceptual Visual Diagram Blueprint */}
+                          <ConceptualVisualizer
+                            text={cleanMsgText}
+                            conceptualError={msg.conceptual_error}
+                            subject={subjectName}
+                            grade={classGrade}
+                          />
+                        </>
+                      );
+                    })()}
 
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
+                      justifyContent: 'flex-end',
                       flexWrap: 'wrap',
                       gap: '12px',
                       borderTop: '1px solid rgba(255,255,255,0.08)',
                       paddingTop: '14px'
                     }}>
-                      {msg.citation ? (
-                        <div className="agency-pill" style={{ color: 'var(--neon-emerald)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                          <BookOpen size={12} />
-                          <span>{msg.citation}</span>
-                        </div>
-                      ) : <span />}
-
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <button
                           onClick={() => handlePlayAudio(msg.id, msg.text || '')}
@@ -957,6 +956,133 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                 <ThinkingEngine classGrade={classGrade} subjectName={subjectName} />
               </div>
             )}
+
+            {/* ─── BOTTOM FOLLOW-UP DOUBT BAR (NO SCROLLING UP NEEDED) ─── */}
+            <div
+              className="glass-card"
+              style={{
+                marginTop: '12px',
+                padding: '22px 26px',
+                borderRadius: '24px',
+                background: 'rgba(10, 12, 20, 0.82)',
+                border: '1px solid rgba(0, 240, 255, 0.28)',
+                boxShadow: '0 12px 40px -10px rgba(0, 0, 0, 0.6)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={16} color="#00f0ff" />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--neon-cyan)', fontWeight: 700, letterSpacing: '0.05em' }}>
+                    HAVE A DOUBT ON THIS STEP? ASK SOCRATIC AI
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => {
+                      setUserText("Can you explain why this formula is used in simpler words?");
+                    }}
+                    className="agency-pill"
+                    style={{ fontSize: '0.66rem', cursor: 'pointer', background: 'rgba(255,255,255,0.04)' }}
+                  >
+                    💬 Simpler explanation
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUserText("What is the next calculation step I should perform?");
+                    }}
+                    className="agency-pill"
+                    style={{ fontSize: '0.66rem', cursor: 'pointer', background: 'rgba(255,255,255,0.04)' }}
+                  >
+                    🔍 Guide my next step
+                  </button>
+                </div>
+              </div>
+
+              {/* Upload preview thumbnail if attached */}
+              {uploadedPreview && (
+                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.4)', padding: '6px 12px', borderRadius: '10px', width: 'fit-content' }}>
+                  <img src={uploadedPreview} alt="Preview" style={{ height: '36px', borderRadius: '6px', border: '1px solid var(--neon-cyan)' }} />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ice-white)' }}>{uploadedFile?.name}</span>
+                  <button onClick={() => { setUploadedFile(null); setUploadedPreview(null); }} style={{ background: 'none', border: 'none', color: '#ff3366', cursor: 'pointer', fontSize: '0.75rem', marginLeft: '6px' }}>✕ Remove</button>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                {/* Fast Upload Attachment Button */}
+                <label
+                  data-cursor-text="ATTACH"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                    color: 'var(--neon-cyan)',
+                    flexShrink: 0
+                  }}
+                  title="Upload follow-up handwritten photo or PDF"
+                >
+                  <Upload size={18} />
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+
+                {/* Follow-up Question Input */}
+                <input
+                  type="text"
+                  value={userText}
+                  onChange={(e) => {
+                    setUserText(e.target.value);
+                    autoDetectSubjectAndGrade(e.target.value);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  placeholder="Ask your follow-up doubt or type your next calculation..."
+                  style={{
+                    flex: 1,
+                    minWidth: '220px',
+                    background: 'rgba(0,0,0,0.55)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '14px',
+                    padding: '13px 18px',
+                    color: 'var(--ice-white)',
+                    fontFamily: 'var(--font-tech)',
+                    fontSize: '0.92rem',
+                    outline: 'none'
+                  }}
+                />
+
+                {/* Submit Doubt Button */}
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading || (!userText.trim() && !uploadedFile)}
+                  className="agency-button-primary"
+                  style={{
+                    padding: '13px 26px',
+                    borderRadius: '14px',
+                    opacity: (isLoading || (!userText.trim() && !uploadedFile)) ? 0.5 : 1,
+                    cursor: (isLoading || (!userText.trim() && !uploadedFile)) ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  <span>{isLoading ? 'ANALYZING...' : 'ASK DOUBT'}</span>
+                  <div className="arrow-circle" style={{ width: '26px', height: '26px' }}>
+                    {isLoading ? <RefreshCw className="node-pulse" size={12} /> : <ArrowUpRight size={14} />}
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         </>
       )}
