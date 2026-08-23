@@ -492,14 +492,15 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
             f"Student Problem / Work: '{extracted_text}'\n"
             f"Diagnosed Flaw / Misconception: '{error}'\n"
             f"Textbook Topic: '{chap_str}'\n\n"
-            "PEDAGOGICAL INSTRUCTIONS (MAKE IT SIMPLE & CLEAR FOR HIGH SCHOOL STUDENTS):\n"
-            "1. Speak in simple, crystal-clear, and encouraging language. Avoid heavy academic jargon.\n"
-            "2. Keep it to 2 short, easy-to-understand sentences:\n"
-            "   - Sentence 1: Point out the key rule or concept in simple terms (e.g. 'Take a look at your calculation: remember that in a concave mirror, light rays focus in front of the mirror...').\n"
-            "   - Sentence 2: Ask a clear guiding question that points them directly toward the right calculation or formula (e.g. 'What sign should you give to $f$ in the formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$?').\n"
+            "PEDAGOGICAL INSTRUCTIONS (MAKE IT SIMPLE & STRUCTURED IN 3 CLEAR BULLETS):\n"
+            "1. Speak in simple, crystal-clear, high-school friendly language. Avoid heavy academic jargon.\n"
+            "2. Structure your entire response into EXACTLY 3 short, readable bullet points:\n"
+            "   • **Key Concept**: (1 short sentence explaining the core rule or principle)\n"
+            "   • **Helpful Clue**: (1 short sentence pointing out where the misconception or key relation lies)\n"
+            "   • **Next Step**: (1 direct guiding question that leads them toward the correct step without giving the final numeric answer)\n"
             "3. DO NOT give away the final numerical solution.\n"
             "4. Format key variables and formulas in clean LaTeX math (e.g. $f = -10\\text{ cm}$, $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$).\n"
-            "5. Output ONLY the clear explanation and question. Do NOT add any citation, reference, or (Ref: ...) tags.\n"
+            "5. Output ONLY the 3 bullet points. Do NOT add any citation, reference, or (Ref: ...) tags.\n"
         )
 
         try:
@@ -508,28 +509,74 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
                 raise ValueError("JSON returned instead of text")
             final_response = re.sub(r'\(Ref:[^)]+\)', '', final_response).strip()
         except Exception:
-            # Dynamic conceptual fallback based on question domain (Simple, friendly, step-by-step)
+            # Dynamic conceptual fallback based on question domain (Structured in 3 simple, friendly bullet points)
             txt_l = (extracted_text + " " + (error or "")).lower()
             if "lcr" in txt_l or "inductor" in txt_l or "capacitor" in txt_l or "30v" in txt_l:
-                q = "In an AC circuit, inductor voltage ($V_L$) and capacitor voltage ($V_C$) oppose each other $180^\\circ$ out of phase. Instead of simply adding them, how does the phasor formula $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$ combine these voltages?"
+                q = (
+                    "• **Key Concept**: In AC circuits, voltage across the inductor ($V_L$) and capacitor ($V_C$) are $180^\\circ$ out of phase and cancel each other out.\n"
+                    "• **Helpful Clue**: Because they are vectors at right angles, total voltage is calculated as $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$, NOT simple addition (150V).\n"
+                    "• **Next Step**: What do you get when substituting $V_R = 30\\text{V}$ and net reactive $(80 - 40) = 40\\text{V}$ into the formula?"
+                )
+            elif "dna" in txt_l or "base pair" in txt_l or "adenine" in txt_l or "guanine" in txt_l or "repair" in txt_l or "inheritance" in txt_l:
+                q = (
+                    "• **Key Concept**: DNA replication and repair strictly follow Chargaff's complementary base-pairing rules ($A$ pairs with $T$ via 2 hydrogen bonds, $G$ pairs with $C$ via 3 bonds).\n"
+                    "• **Helpful Clue**: DNA strands are antiparallel, meaning a $5' \\rightarrow 3'$ strand always pairs with an opposing $3' \\rightarrow 5'$ partner.\n"
+                    "• **Next Step**: When rebuilding the complementary strand, how do matching base pairs ensure the genetic code remains 100% exact?"
+                )
             elif "wave" in txt_l or "ydse" in txt_l or "mica" in txt_l or "fringe" in txt_l:
-                q = "Adding a mica sheet creates a path delay that shifts the entire pattern, but the fringe width $\\beta = \\frac{\\lambda D}{d}$ depends only on wavelength and slit distance. Why does the width of each fringe remain the exact same?"
+                q = (
+                    "• **Key Concept**: Placing a thin mica sheet in front of one slit introduces a path delay, which shifts the central bright fringe position.\n"
+                    "• **Helpful Clue**: Fringe width is governed purely by $\\beta = \\frac{\\lambda D}{d}$, which only depends on wavelength $\\lambda$, screen distance $D$, and slit separation $d$.\n"
+                    "• **Next Step**: Since none of $\\lambda, D,$ or $d$ changed, why does the spacing between consecutive fringes stay identical?"
+                )
             elif "concave" in txt_l or "mirror" in txt_l or "15cm" in txt_l or "sign" in txt_l:
-                q = "Remember the sign convention: because a concave mirror focuses light in front of itself (to the left), its focal length is always negative ($f = -10\\text{ cm}$). How does using $f = -10\\text{ cm}$ in the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ change your calculation for $v$?"
+                q = (
+                    "• **Key Concept**: Under Cartesian sign convention, all distances measured to the left of the Pole ($P$) against incoming light are negative.\n"
+                    "• **Helpful Clue**: A concave mirror focuses light in front of itself, so its focal length must be negative ($f = -10\\text{ cm}$), and object distance is $u = -15\\text{ cm}$.\n"
+                    "• **Next Step**: What value of $v$ do you obtain when using negative signs in the mirror equation $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$?"
+                )
             elif "nernst" in txt_l or "galvanic" in txt_l or "ag+" in txt_l or "zn2+" in txt_l:
-                q = "Look at the balanced reaction $\\text{Zn} + 2\\text{Ag}^+ \\rightarrow \\text{Zn}^{2+} + 2\\text{Ag}$. In the Nernst reaction quotient $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, what power must you raise $[\\text{Ag}^+]$ to because of its coefficient 2?"
+                q = (
+                    "• **Key Concept**: In the Nernst equation, each ion's concentration in the reaction quotient $Q$ is raised to the power of its balanced stoichiometric coefficient.\n"
+                    "• **Helpful Clue**: For the cell reaction $\\text{Zn} + 2\\text{Ag}^+ \\rightarrow \\text{Zn}^{2+} + 2\\text{Ag}$, the coefficient of $\\text{Ag}^+$ is $2$.\n"
+                    "• **Next Step**: How does squaring $[\text{Ag}^+]$ in $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$ change your calculation for $E_{\\text{cell}}$?"
+                )
             elif "redox" in txt_l or "oxidation" in txt_l or "cr2o7" in txt_l or "dichromate" in txt_l:
-                q = "In potassium dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), all charges balance to zero: $2(+1) + 2x + 7(-2) = 0$, giving $2x = +12$. Since there are two chromium atoms sharing this $+12$ charge, what is the oxidation number on each single chromium atom?"
+                q = (
+                    "• **Key Concept**: In a neutral compound like $\\text{K}_2\\text{Cr}_2\\text{O}_7$, the sum of all oxidation numbers must equal zero.\n"
+                    "• **Helpful Clue**: Potassium is $+1$ and Oxygen is $-2$, giving the balance equation $2(+1) + 2x + 7(-2) = 0$, so $2x = +12$.\n"
+                    "• **Next Step**: Since there are 2 Chromium atoms sharing the $+12$ charge, what is the oxidation state of each individual Cr atom?"
+                )
             elif "integral" in txt_l or "x^4" in txt_l or "rational" in txt_l:
-                q = "If you divide the numerator and denominator by $x^2$, the integral becomes $\\int \\frac{1 + 1/x^2}{(x - 1/x)^2 + 2}\\,dx$. What happens when you use the substitution $u = x - \\frac{1}{x}$ with $du = \\left(1 + \\frac{1}{x^2}\\right)dx$?"
+                q = (
+                    "• **Key Concept**: Symmetrical rational integrals are simplified by dividing both numerator and denominator by $x^2$.\n"
+                    "• **Helpful Clue**: Completing the square in the denominator gives $(x - 1/x)^2 + 2$, with derivative $du = (1 + 1/x^2)dx$.\n"
+                    "• **Next Step**: How does the substitution $u = x - \\frac{1}{x}$ transform this into the standard integral $\\int \\frac{du}{u^2 + (\\sqrt{2})^2}$?"
+                )
             elif "tan^-1" in txt_l or "cos x - sin x" in txt_l or "inverse trig" in txt_l:
-                q = "Before differentiating, try dividing top and bottom by $\\cos(x)$ to get $y = \\tan^{-1}\\left(\\tan\\left(\\frac{\\pi}{4} - x\\right)\\right) = \\frac{\\pi}{4} - x$. How much easier does this make finding $\\frac{dy}{dx}$?"
+                q = (
+                    "• **Key Concept**: Simplifying trigonometric expressions inside inverse trig functions avoids messy quotient-rule derivatives.\n"
+                    "• **Helpful Clue**: Dividing by $\\cos(x)$ gives $\\frac{1 - \\tan(x)}{1 + \\tan(x)} = \\tan\\left(\\frac{\\pi}{4} - x\\right)$, reducing the whole function to $y = \\frac{\\pi}{4} - x$.\n"
+                    "• **Next Step**: What is the simple derivative $\\frac{dy}{dx}$ of $\\frac{\\pi}{4} - x$?"
+                )
             elif "photosynthesis" in txt_l or "calvin" in txt_l or "z-scheme" in txt_l:
-                q = "Cyclic photophosphorylation in the stroma lamellae uses only Photosystem I (PS-I) to generate $\\text{ATP}$. Why is non-cyclic photophosphorylation (Z-scheme) needed to produce $\\text{NADPH}$ for the Calvin cycle?"
+                q = (
+                    "• **Key Concept**: Light reactions in chloroplasts operate via two distinct pathways: Cyclic (PS-I only) and Non-Cyclic Z-Scheme (PS-II + PS-I).\n"
+                    "• **Helpful Clue**: Cyclic photophosphorylation only synthesizes $\\text{ATP}$, while the Calvin cycle also demands reducing power ($\\text{NADPH}$).\n"
+                    "• **Next Step**: Why is non-cyclic photophosphorylation necessary to provide $\\text{NADPH}$ for fixing $\\text{CO}_2$ into glucose?"
+                )
             elif "lac" in txt_l or "operon" in txt_l or "repressor" in txt_l:
-                q = "In the Lac Operon, the repressor protein naturally blocks RNA polymerase when lactose is absent. What happens to the repressor when allolactose binds to it as an inducer?"
+                q = (
+                    "• **Key Concept**: The Lac Operon is an inducible gene regulation system controlled by a repressor protein binding to the operator region.\n"
+                    "• **Helpful Clue**: When lactose is present, its metabolite allolactose binds to the repressor and alters its shape so it cannot attach to the operator.\n"
+                    "• **Next Step**: With the operator cleared, what enzyme is now free to transcribe the structural genes ($z, y, a$)?"
+                )
             else:
-                q = f"Take a look at the given values in {chap_str}. Which standard formula connects these quantities, and what is the first step you should take?"
+                q = (
+                    f"• **Key Concept**: Let's break down the foundational principles of {chap_str}.\n"
+                    "• **Helpful Clue**: Check the given parameters and identify which standard formula links these variables directly.\n"
+                    "• **Next Step**: What is the first mathematical step or relation you can write down?"
+                )
             final_response = q.strip()
 
     logs.append({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Zap, Compass, Activity, CheckCircle2 } from 'lucide-react';
+import { Eye, Zap, Compass, Activity, Dna, GitBranch, ShieldAlert } from 'lucide-react';
 import { MathText } from './MathText';
 
 interface ConceptualVisualizerProps {
@@ -79,7 +79,95 @@ export const ConceptualVisualizer: React.FC<ConceptualVisualizerProps> = ({
     );
   }
 
-  // 2. Optics: Concave Mirror & Lens Cartesian Sign Convention
+  // 2. DNA Replication, Repair & Base Pairing (Molecular Biology)
+  if (combined.includes('dna') || combined.includes('base pair') || combined.includes('adenine') || combined.includes('thymine') || combined.includes('guanine') || combined.includes('cytosine') || combined.includes('repair') || combined.includes('inheritance') || combined.includes('a - t') || combined.includes('g - c')) {
+    return (
+      <div className="conceptual-diagram-card" style={{ marginTop: '16px', background: 'rgba(10, 12, 18, 0.85)', border: '1px solid rgba(0, 240, 255, 0.28)', borderRadius: '18px', padding: '18px 22px', display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Dna size={16} color="#00f0ff" />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--neon-cyan)', fontWeight: 700 }}>
+              MOLECULAR BIOLOGY: COMPLEMENTARY BASE-PAIRING MAP
+            </span>
+          </div>
+          <span className="agency-pill" style={{ fontSize: '0.62rem', borderColor: 'var(--neon-emerald)', color: 'var(--neon-emerald)' }}>
+            CHARGAFF & ANTIPARALLEL RULES
+          </span>
+        </div>
+
+        {/* Base pairing visual ladder */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', padding: '6px 0' }}>
+          <div style={{ background: 'rgba(0, 240, 255, 0.05)', border: '1px solid rgba(0, 240, 255, 0.25)', borderRadius: '12px', padding: '12px' }}>
+            <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--neon-cyan)', fontWeight: 700 }}>
+              ADENINE (A) ═ THYMINE (T)
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--ice-white)', marginTop: '4px' }}>
+              • <strong>2 Hydrogen Bonds</strong>
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+              Template: 5' - A - 3' ➔ Partner: 3' - T - 5'
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.25)', borderRadius: '12px', padding: '12px' }}>
+            <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--neon-purple)', fontWeight: 700 }}>
+              GUANINE (G) ≡ CYTOSINE (C)
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--ice-white)', marginTop: '4px' }}>
+              • <strong>3 Hydrogen Bonds (Higher Stability)</strong>
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+              Template: 5' - G - 3' ➔ Partner: 3' - C - 5'
+            </div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--text-muted)', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px', marginTop: '10px' }}>
+          <MathText text="💡 **Rule:** $5' \rightarrow 3'$ template strand synthesizes an antiparallel $3' \rightarrow 5'$ partner using $A=T$ and $G\equiv C$ complementary bonding." />
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Lac Operon (Genetics & Gene Expression)
+  if (combined.includes('operon') || combined.includes('repressor') || combined.includes('allolactose') || combined.includes('inducer') || combined.includes('promoter') || combined.includes('operator')) {
+    return (
+      <div className="conceptual-diagram-card" style={{ marginTop: '16px', background: 'rgba(10, 12, 18, 0.85)', border: '1px solid rgba(212, 255, 0, 0.28)', borderRadius: '18px', padding: '18px 22px', display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <GitBranch size={16} color="#d4ff00" />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#d4ff00', fontWeight: 700 }}>
+              GENETICS: LAC OPERON INDUCTION SWITCH
+            </span>
+          </div>
+          <span className="agency-pill" style={{ fontSize: '0.62rem', borderColor: '#d4ff00', color: '#d4ff00' }}>
+            ALLOLACTOSE = INACTIVATES REPRESSOR
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', padding: '6px 0' }}>
+          <div style={{ background: 'rgba(255, 51, 102, 0.08)', border: '1px solid rgba(255, 51, 102, 0.25)', borderRadius: '12px', padding: '12px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ff3366' }}>Lactose Absent (OFF)</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+              • Repressor binds Operator (O)<br />
+              • RNA Polymerase blocked<br />
+              • <strong>No Enzymes Made</strong>
+            </div>
+          </div>
+          <div style={{ background: 'rgba(0, 255, 163, 0.08)', border: '1px solid rgba(0, 255, 163, 0.25)', borderRadius: '12px', padding: '12px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#00ffa3' }}>Lactose Present (ON)</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+              • Allolactose binds Repressor<br />
+              • Repressor releases Operator<br />
+              • <strong>z, y, a Genes Transcribed</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Optics: Concave Mirror & Lens Cartesian Sign Convention
   if (combined.includes('mirror') || combined.includes('lens') || combined.includes('concave') || combined.includes('focal') || combined.includes('cartesian') || combined.includes('sign convention') || combined.includes('15cm')) {
     return (
       <div className="conceptual-diagram-card" style={{ marginTop: '16px', background: 'rgba(10, 12, 18, 0.85)', border: '1px solid rgba(0, 240, 255, 0.25)', borderRadius: '18px', padding: '18px 22px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
@@ -97,33 +185,18 @@ export const ConceptualVisualizer: React.FC<ConceptualVisualizerProps> = ({
 
         <div style={{ width: '100%', maxWidth: '440px', display: 'flex', justifyContent: 'center', padding: '6px 0' }}>
           <svg width="100%" height="auto" viewBox="0 0 420 160" style={{ overflow: 'visible', maxWidth: '420px' }}>
-            {/* Principal Axis */}
             <line x1="20" y1="80" x2="390" y2="80" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.4" />
-            
-            {/* Mirror Arc (Concave) */}
             <path d="M 310,25 Q 295,80 310,135" fill="none" stroke="#00f0ff" strokeWidth="4" strokeLinecap="round" />
-            
-            {/* Pole P */}
             <circle cx="302" cy="80" r="4" fill="#00f0ff" />
             <text x="308" y="98" fill="#00f0ff" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">P(0,0)</text>
-
-            {/* Focus F */}
             <circle cx="210" cy="80" r="3.5" fill="#ff3366" />
             <text x="200" y="98" fill="#ff3366" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">F (-f)</text>
-
-            {/* Center of Curvature C */}
             <circle cx="120" cy="80" r="3.5" fill="#8b5cf6" />
             <text x="110" y="98" fill="#8b5cf6" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">C (-2f)</text>
-
-            {/* Object Arrow */}
             <line x1="160" y1="80" x2="160" y2="38" stroke="#d4ff00" strokeWidth="2.5" />
             <text x="135" y="30" fill="#d4ff00" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">Object (u &lt; 0)</text>
-
-            {/* Incident Light Arrow */}
             <line x1="40" y1="20" x2="120" y2="20" stroke="rgba(255, 255, 255, 0.4)" strokeWidth="1.5" strokeDasharray="3,3" />
             <text x="45" y="14" fill="rgba(255, 255, 255, 0.6)" fontSize="9" fontFamily="var(--font-mono)">Incident Light (+X)</text>
-
-            {/* Negative region label */}
             <rect x="35" y="122" width="230" height="24" rx="5" fill="rgba(255, 51, 102, 0.12)" stroke="rgba(255, 51, 102, 0.3)" />
             <text x="45" y="138" fill="#ff99aa" fontSize="10" fontFamily="var(--font-mono)">
               LEFT OF POLE: ALWAYS NEGATIVE (-)
@@ -137,8 +210,8 @@ export const ConceptualVisualizer: React.FC<ConceptualVisualizerProps> = ({
     );
   }
 
-  // 3. Chemistry: Galvanic Cell & Nernst Reaction Quotient
-  if (combined.includes('nernst') || combined.includes('galvanic') || combined.includes('cell') || combined.includes('redox') || combined.includes('ag+') || combined.includes('zn2+')) {
+  // 5. Chemistry: Galvanic Cell & Nernst Reaction Quotient
+  if (combined.includes('nernst') || combined.includes('galvanic') || combined.includes('cell') || combined.includes('ag+') || combined.includes('zn2+')) {
     return (
       <div className="conceptual-diagram-card" style={{ marginTop: '16px', background: 'rgba(10, 12, 18, 0.85)', border: '1px solid rgba(139, 92, 246, 0.25)', borderRadius: '18px', padding: '18px 22px', display: 'flex', flexDirection: 'column', width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
@@ -178,7 +251,35 @@ export const ConceptualVisualizer: React.FC<ConceptualVisualizerProps> = ({
     );
   }
 
-  // 4. Mathematics: Calculus Substitution & Area Graph
+  // 6. Chemistry: Redox Oxidation State Balance
+  if (combined.includes('redox') || combined.includes('oxidation') || combined.includes('cr2o7') || combined.includes('dichromate')) {
+    return (
+      <div className="conceptual-diagram-card" style={{ marginTop: '16px', background: 'rgba(10, 12, 18, 0.85)', border: '1px solid rgba(255, 51, 102, 0.28)', borderRadius: '18px', padding: '18px 22px', display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldAlert size={14} color="#ff3366" />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#ff3366', fontWeight: 700 }}>
+              CHEMISTRY: OXIDATION STATE BALANCE EQUATION
+            </span>
+          </div>
+          <span className="agency-pill" style={{ fontSize: '0.62rem', borderColor: '#ff3366', color: '#ff3366' }}>
+            SUM OF CHARGES = 0
+          </span>
+        </div>
+
+        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.88rem', color: 'var(--neon-cyan)' }}>
+            K₂Cr₂O₇ ➔ 2(+1) + 2(x) + 7(-2) = 0
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: '#00ffa3', marginTop: '6px' }}>
+            +2 + 2x - 14 = 0 ➔ 2x = +12 ➔ x = +6 per Cr
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 7. Mathematics: Calculus Substitution & Area Graph
   if (combined.includes('integral') || combined.includes('calculus') || combined.includes('derivative') || combined.includes('substitution') || combined.includes('dx') || combined.includes('rational')) {
     return (
       <div className="conceptual-diagram-card" style={{ marginTop: '16px', background: 'rgba(10, 12, 18, 0.85)', border: '1px solid rgba(0, 255, 163, 0.25)', borderRadius: '18px', padding: '18px 22px', display: 'flex', flexDirection: 'column', width: '100%' }}>
@@ -217,15 +318,15 @@ export const ConceptualVisualizer: React.FC<ConceptualVisualizerProps> = ({
     );
   }
 
-  // 5. Biology: Photosynthesis & Molecular Genetics
-  if (combined.includes('photosynthesis') || combined.includes('z-scheme') || combined.includes('calvin') || combined.includes('operon') || combined.includes('dna') || combined.includes('chlorophyll')) {
+  // 8. Biology: Photosynthesis & Light Reactions
+  if (combined.includes('photosynthesis') || combined.includes('z-scheme') || combined.includes('calvin') || combined.includes('chlorophyll') || combined.includes('thylakoid')) {
     return (
       <div className="conceptual-diagram-card" style={{ marginTop: '16px', background: 'rgba(10, 12, 18, 0.85)', border: '1px solid rgba(212, 255, 0, 0.25)', borderRadius: '18px', padding: '18px 22px', display: 'flex', flexDirection: 'column', width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CheckCircle2 size={14} color="#d4ff00" />
+            <Activity size={14} color="#d4ff00" />
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#d4ff00', fontWeight: 700 }}>
-              BIOLOGICAL PATHWAY ARCHITECTURE (NCERT)
+              PLANT PHYSIOLOGY: PHOTOSYNTHETIC PATHWAY ARCHITECTURE
             </span>
           </div>
           <span className="agency-pill" style={{ fontSize: '0.62rem', borderColor: '#d4ff00', color: '#d4ff00' }}>

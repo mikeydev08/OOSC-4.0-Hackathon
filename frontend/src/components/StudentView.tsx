@@ -863,11 +863,50 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
 
                     {(() => {
                       const cleanMsgText = (msg.text || '').replace(/\(Ref:[^)]+\)/gi, '').trim();
+                      const lines = cleanMsgText.split('\n').map(l => l.trim()).filter(Boolean);
+                      const isBulleted = lines.length > 1 || cleanMsgText.includes('•') || cleanMsgText.includes('- ');
+
                       return (
                         <>
-                          <div style={{ fontSize: '1.14rem', color: 'var(--ice-white)', lineHeight: 1.55, fontWeight: 600, marginBottom: '18px' }}>
-                            "<MathText text={cleanMsgText} />"
-                          </div>
+                          {isBulleted ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
+                              {lines.map((line, lIdx) => {
+                                const formattedLine = line.replace(/^[•\-\*]\s*/, '');
+                                const dotColor = lIdx === 0 ? 'var(--neon-cyan)' : lIdx === 1 ? 'var(--neon-purple)' : 'var(--neon-emerald)';
+                                return (
+                                  <div
+                                    key={lIdx}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'flex-start',
+                                      gap: '12px',
+                                      background: 'rgba(255, 255, 255, 0.03)',
+                                      border: '1px solid rgba(255, 255, 255, 0.07)',
+                                      borderRadius: '14px',
+                                      padding: '12px 16px'
+                                    }}
+                                  >
+                                    <div style={{
+                                      width: '8px',
+                                      height: '8px',
+                                      borderRadius: '50%',
+                                      background: dotColor,
+                                      marginTop: '7px',
+                                      flexShrink: 0,
+                                      boxShadow: `0 0 10px ${dotColor}`
+                                    }} />
+                                    <div style={{ fontSize: '1.04rem', color: 'var(--ice-white)', lineHeight: 1.6, flex: 1, fontWeight: 500 }}>
+                                      <MathText text={formattedLine} />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '1.14rem', color: 'var(--ice-white)', lineHeight: 1.55, fontWeight: 600, marginBottom: '18px' }}>
+                              "<MathText text={cleanMsgText} />"
+                            </div>
+                          )}
 
                           {/* Interactive Conceptual Visual Diagram Blueprint */}
                           <ConceptualVisualizer
