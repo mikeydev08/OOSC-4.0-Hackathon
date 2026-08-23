@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, RefreshCw, BookOpen, AlertCircle, Volume2, FileText, User, BookMarked, GraduationCap, ArrowUpRight, Eye, EyeOff, Sparkles, Pause, Play, Square } from 'lucide-react';
 import { MCQQuizModule } from './MCQQuizModule';
 import { MathText } from './MathText';
@@ -43,7 +43,7 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
   const [autoDetectLabel, setAutoDetectLabel] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
-  const responseAreaRef = useRef<HTMLDivElement>(null);
+  const thinkingEngineRef = useRef<HTMLDivElement>(null);
   const latestResponseRef = useRef<HTMLDivElement>(null);
 
   const [audioState, setAudioState] = useState<{
@@ -65,6 +65,29 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
+
+  // Reactive Smooth Scroll: Auto-scroll when analyzing
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        thinkingEngineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  // Reactive Smooth Scroll: Auto-scroll directly to the newly generated AI answer
+  useEffect(() => {
+    if (messages.length > 1) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.sender === 'tutor') {
+        const timer = setTimeout(() => {
+          latestResponseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [messages]);
 
   // Real-time automatic Subject & Grade Classifier
   const autoDetectSubjectAndGrade = (text: string) => {
@@ -227,11 +250,6 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
     setMessages((prev) => [...prev, newStudentMsg]);
     setIsLoading(true);
     setUserText('');
-
-    // Smooth scroll animation to thinking engine
-    setTimeout(() => {
-      responseAreaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
 
     try {
       const formData = new FormData();
@@ -748,7 +766,7 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
           </div>
 
           {/* ─── DUAL-CARD SOCRATIC REASONING FEED ─── */}
-          <div ref={responseAreaRef} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {messages.map((msg, idx) => (
               <div key={msg.id}>
                 {msg.sender === 'student' ? (
@@ -935,7 +953,9 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
 
             {/* Neural Socratic Processing Engine */}
             {isLoading && (
-              <ThinkingEngine classGrade={classGrade} subjectName={subjectName} />
+              <div ref={thinkingEngineRef}>
+                <ThinkingEngine classGrade={classGrade} subjectName={subjectName} />
+              </div>
             )}
           </div>
         </>
