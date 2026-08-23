@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Upload, RefreshCw, BookOpen, AlertCircle, Volume2, FileText, User, BookMarked, GraduationCap, ArrowUpRight, Eye, EyeOff, Sparkles, Pause, Play, Square } from 'lucide-react';
 import { MCQQuizModule } from './MCQQuizModule';
 import { MathText } from './MathText';
 import { ThinkingEngine } from './ThinkingEngine';
 import { SpatialErrorPointer } from './SpatialErrorPointer';
+import { ConceptualVisualizer } from './ConceptualVisualizer';
 import { DEFAULT_PRESETS } from '../constants/presets';
 
 interface Message {
@@ -42,6 +43,9 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
   const [autoDetectLabel, setAutoDetectLabel] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
+  const responseAreaRef = useRef<HTMLDivElement>(null);
+  const latestResponseRef = useRef<HTMLDivElement>(null);
+
   const [audioState, setAudioState] = useState<{
     isPlaying: boolean;
     isPaused: boolean;
@@ -224,6 +228,11 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
     setIsLoading(true);
     setUserText('');
 
+    // Smooth scroll animation to thinking engine
+    setTimeout(() => {
+      responseAreaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+
     try {
       const formData = new FormData();
       formData.append('student_name', studentName || 'Student');
@@ -267,6 +276,12 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
       setSelectedPreset(null);
       setUploadedFile(null);
       setUploadedPreview(null);
+
+      // Smooth scroll down to the newly rendered Socratic answer
+      setTimeout(() => {
+        latestResponseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+
       if (onSolveComplete) onSolveComplete();
     } catch (e) {
       console.error(e);
@@ -733,8 +748,8 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
           </div>
 
           {/* ─── DUAL-CARD SOCRATIC REASONING FEED ─── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {messages.map((msg) => (
+          <div ref={responseAreaRef} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {messages.map((msg, idx) => (
               <div key={msg.id}>
                 {msg.sender === 'student' ? (
                   /* Student Submission Box */
@@ -786,6 +801,7 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                 ) : (
                   /* AI Socratic Reasoning Output Box */
                   <div
+                    ref={idx === messages.length - 1 ? latestResponseRef : null}
                     className="glass-card"
                     style={{
                       background: 'rgba(0, 240, 255, 0.04)',
@@ -831,6 +847,14 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                     <div style={{ fontSize: '1.14rem', color: 'var(--ice-white)', lineHeight: 1.55, fontWeight: 600, marginBottom: '18px' }}>
                       "<MathText text={msg.text} />"
                     </div>
+
+                    {/* Interactive Conceptual Visual Diagram Blueprint */}
+                    <ConceptualVisualizer
+                      text={msg.text}
+                      conceptualError={msg.conceptual_error}
+                      subject={subjectName}
+                      grade={classGrade}
+                    />
 
                     <div style={{
                       display: 'flex',
