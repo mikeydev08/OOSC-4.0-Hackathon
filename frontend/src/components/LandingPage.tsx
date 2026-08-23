@@ -167,7 +167,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
       badge: 'NODE 01: MULTI-SUBJECT PARSER',
       icon: Cpu,
       color: '#00f0ff',
-      status: 'GRADES: 9, 10, 11, 12 • LATENCY 42ms'
+      status: 'GRADES: 10, 11, 12 • LATENCY 42ms'
     },
     {
       num: '02',
@@ -417,7 +417,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
               CURRICULUM REACH
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--ice-white)', marginTop: '4px' }}>
-              Classes 9, 10, 11 & 12
+              Classes 10, 11 & 12
             </div>
           </div>
 
