@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, AlertTriangle, CheckCircle2, Clock, FileText, Search, ExternalLink, UserCheck, Sparkles, BookOpen, Trash2, Zap } from 'lucide-react';
+import { Users, AlertTriangle, CheckCircle2, Clock, FileText, Search, UserCheck, Sparkles, Trash2, Zap } from 'lucide-react';
 import { RemedialWorksheetModal, type RemedialWorksheetData } from './RemedialWorksheetModal';
 import { MathText } from './MathText';
 
@@ -327,7 +327,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ apiBaseUrl =
                   👤 {activeStudentProfile.student_name}
                 </span>
                 <span className="agency-pill" style={{ marginLeft: '14px', fontSize: '0.72rem' }}>
-                  {activeStudentProfile.subject_name}
+                  {activeStudentProfile.subject_name?.replace(/\bClass\s+\d+\s+Class\s+(\d+)\b/gi, 'Class $1').replace(/\b(Class\s+\d+)\s+\1\b/gi, '$1')}
                 </span>
               </div>
 
@@ -475,7 +475,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ apiBaseUrl =
                       🎓 {log.student_name}
                     </span>
                     <span className="agency-pill" style={{ fontSize: '0.68rem' }}>
-                      {log.subject_name}
+                      {log.subject_name?.replace(/\bClass\s+\d+\s+Class\s+(\d+)\b/gi, 'Class $1').replace(/\b(Class\s+\d+)\s+\1\b/gi, '$1')}
                     </span>
                     <span className="agency-pill" style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>
                       {log.submission_source}
@@ -522,18 +522,6 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ apiBaseUrl =
                     <div style={{ fontSize: '0.92rem', color: 'var(--ice-white)', marginTop: '2px', fontWeight: 600 }}>
                       <MathText text={log.topic} />
                     </div>
-                    {log.file_url && (
-                      <a
-                        href={`${apiBaseUrl}${log.file_url}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="agency-pill"
-                        style={{ marginTop: '8px', display: 'inline-flex', cursor: 'pointer', color: 'var(--neon-cyan)' }}
-                      >
-                        <ExternalLink size={12} />
-                        <span>VIEW FILE ({log.file_name})</span>
-                      </a>
-                    )}
                   </div>
 
                   {log.conceptual_error && (
@@ -556,12 +544,6 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ apiBaseUrl =
                   <div style={{ fontSize: '0.94rem', color: 'var(--ice-white)', fontWeight: 500 }}>
                     "<MathText text={log.socratic_response} />"
                   </div>
-                  {log.citation && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', color: 'var(--neon-emerald)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
-                      <BookOpen size={12} />
-                      <span>{log.citation}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             ))

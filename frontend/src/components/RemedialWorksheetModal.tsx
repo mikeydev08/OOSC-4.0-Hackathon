@@ -146,7 +146,7 @@ Challenge: ${worksheet.part3_mastery_challenge.problem}
             </span>
             <span className="agency-pill" style={{ color: 'var(--neon-emerald)', borderColor: 'rgba(16, 185, 129, 0.4)', fontSize: '0.68rem' }}>
               <BookOpen size={12} />
-              <span>{worksheet.target_ncert_ref}</span>
+              <span>{worksheet.target_ncert_ref?.replace(/\bClass\s+\d+\s+Class\s+\d+\s+Class\s+(\d+)\b/gi, 'Class $1').replace(/\bClass\s+\d+\s+Class\s+(\d+)\b/gi, 'Class $1').replace(/\b(Class\s+\d+)\s+\1\b/gi, '$1')}</span>
             </span>
           </div>
 

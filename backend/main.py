@@ -362,12 +362,15 @@ def get_scholarship_guidance(req: ScholarshipGuidanceRequest):
     if not matched_sch:
         raise HTTPException(status_code=404, detail="Scholarship not found")
 
+    target_lang = req.language or "English"
+
     prompt = (
         f"You are an expert Government Scholarship & Social Equity Advisor for Indian Students.\n"
         f"Target Scheme: {matched_sch['name']} ({matched_sch['offered_by']})\n"
         f"Grant Value: {matched_sch['award_amount']}\n"
         f"Student Profile: Grade {req.class_grade}, Category {req.category}, Gender {req.gender}, Annual Family Income: ₹{int(req.annual_income):,}\n"
-        f"Preferred Language: {req.language}\n\n"
+        f"Target Language: {target_lang}\n\n"
+        f"MANDATORY INSTRUCTION: You MUST translate and write ALL JSON response values strictly in {target_lang} script (e.g. if Hindi, use Devanagari हिन्दी; if Tamil, use தமிழ்; if Telugu, use తెలుగు; if Marathi, use मराठी; if Bengali, use বাংলা).\n\n"
         "Provide a concise, practical 3-step action guide in strict JSON format:\n"
         "{\n"
         '  "eligibility_verdict": "...",\n'
@@ -378,25 +381,108 @@ def get_scholarship_guidance(req: ScholarshipGuidanceRequest):
     )
 
     try:
-        raw = call_gemini(prompt, preferred_model="gemini-3.6-flash")
+        raw = call_gemini(prompt, preferred_model="gemini-2.5-flash")
         cleaned = re.sub(r'^```json\s*', '', raw, flags=re.MULTILINE)
         cleaned = re.sub(r'```$', '', cleaned, flags=re.MULTILINE).strip()
         guidance = json.loads(cleaned)
     except Exception:
-        guidance = {
-            "eligibility_verdict": f"You are eligible to apply for {matched_sch['name']}.",
-            "key_documents_to_prepare": matched_sch["required_documents"],
-            "step_by_step_application_flow": [
-                f"Register on official portal: {matched_sch['portal_url']}",
-                "Upload Income Certificate and Academic Marksheets",
-                "Verify Aadhaar with linked Bank Account for Direct Benefit Transfer (DBT)"
-            ],
-            "expert_tip_to_win": "Ensure all documents are updated for the current financial year to avoid portal rejection."
-        }
+        lang_lower = target_lang.lower()
+        if "hindi" in lang_lower or "हिन्दी" in lang_lower:
+            guidance = {
+                "eligibility_verdict": f"आप {matched_sch['name']} के लिए पूरी तरह पात्र हैं।",
+                "key_documents_to_prepare": [
+                    "पिछली कक्षा की मार्कशीट (न्यूनतम 75% अंक)",
+                    "पारिवारिक आय प्रमाण पत्र (सक्षम अधिकारी द्वारा जारी)",
+                    "आधार कार्ड और बैंक खाता विवरण (DBT सक्रिय)",
+                    "वर्तमान शैक्षणिक वर्ष की प्रवेश रसीद"
+                ],
+                "step_by_step_application_flow": [
+                    f"आधिकारिक पोर्टल पर पंजीकरण करें: {matched_sch['portal_url']}",
+                    "आय प्रमाण पत्र और सभी शैक्षणिक दस्तावेज अपलोड करें",
+                    "डायरेक्ट बेनिफिट ट्रांसफर (DBT) के लिए आधार से जुड़ा बैंक खाता सत्यापित करें"
+                ],
+                "expert_tip_to_win": "अस्वीकृति से बचने के लिए सुनिश्चित करें कि सभी प्रमाण पत्र चालू वित्तीय वर्ष के हों।"
+            }
+        elif "tamil" in lang_lower or "தமிழ்" in lang_lower:
+            guidance = {
+                "eligibility_verdict": f"நீங்கள் {matched_sch['name']} உதவித்தொகைக்கு விண்ணப்பிக்க தகுதியுடையவர்.",
+                "key_documents_to_prepare": [
+                    "முந்தைய ஆண்டு மதிப்பெண் பட்டியல்",
+                    "குடும்ப வருமானச் சான்றிதழ்",
+                    "ஆதார் அட்டை மற்றும் வங்கி கணக்கு விவரங்கள்",
+                    "பள்ளி சேர்க்கை ரசீது"
+                ],
+                "step_by_step_application_flow": [
+                    f"அதிகாரப்பூர்வ இணையதளத்தில் பதிவு செய்யவும்: {matched_sch['portal_url']}",
+                    "வருமானச் சான்றிதழ் மற்றும் ஆவணங்களை பதிவேற்றவும்",
+                    "DBT பரிவர்த்தனைக்காக ஆதார் இணைக்கப்பட்ட வங்கிக் கணக்கை சரிபார்க்கவும்"
+                ],
+                "expert_tip_to_win": "விண்ணப்பம் நிராகரிக்கப்படுவதைத் தவிர்க்க தற்போதைய நிதியாண்டின் ஆவணங்களைப் பயன்படுத்தவும்."
+            }
+        elif "telugu" in lang_lower or "తెలుగు" in lang_lower:
+            guidance = {
+                "eligibility_verdict": f"మీరు {matched_sch['name']} స్కాలర్‌షిప్‌కు దరఖాస్తు చేసుకోవడానికి అర్హులు.",
+                "key_documents_to_prepare": [
+                    "మునుపటి సంవత్సరం మార్కుల జాబితా",
+                    "కుటుంబ ఆదాయ ధృవీకరణ పత్రం",
+                    "ఆధార్ కార్డు మరియు బ్యాంక్ ఖాతా వివరాలు",
+                    "పాఠశాల ప్రవేశ రసీదు"
+                ],
+                "step_by_step_application_flow": [
+                    f"అధికారిక పోర్టల్‌లో నమోదు చేసుకోండి: {matched_sch['portal_url']}",
+                    "ఆదాయ ధృవీకరణ పత్రం మరియు మార్కుల జాబితాను అప్‌లోడ్ చేయండి",
+                    "DBT కోసం ఆధార్‌తో లింక్ చేయబడిన బ్యాంక్ ఖాతాను ధృవీకరించండి"
+                ],
+                "expert_tip_to_win": "తిరస్కరణను నివారించడానికి ప్రస్తుత ఆర్థిక సంవత్సరానికి సంబంధించిన పత్రాలను సమర్పించండి."
+            }
+        elif "marathi" in lang_lower or "मराठी" in lang_lower:
+            guidance = {
+                "eligibility_verdict": f"तुम्ही {matched_sch['name']} शिष्यवृत्तीसाठी पात्र आहात.",
+                "key_documents_to_prepare": [
+                    "मागील वर्षाची गुणपत्रिका",
+                    "कुटुंबाचा वार्षिक उत्पन्न दाखला",
+                    "आधार कार्ड आणि बँक खाते तपशील",
+                    "शाळा प्रवेश पावती"
+                ],
+                "step_by_step_application_flow": [
+                    f"अधिकृत पोर्टलवर नोंदणी करा: {matched_sch['portal_url']}",
+                    "उत्पन्न दाखला आणि आवश्यक कागदपत्रे अपलोड करा",
+                    "DBT साठी आधार लिंक केलेले बँक खाते सत्यापित करा"
+                ],
+                "expert_tip_to_win": "अर्जाची पडताळणी सुरळीत होण्यासाठी चालू आर्थिक वर्षाचे दस्तऐवज वापरा."
+            }
+        elif "bengali" in lang_lower or "বাংলা" in lang_lower:
+            guidance = {
+                "eligibility_verdict": f"আপনি {matched_sch['name']} স্কলারশিপের জন্য যোগ্য।",
+                "key_documents_to_prepare": [
+                    "পূর্ববর্তী পরীক্ষার মার্কশিট",
+                    "পারিবারিক বার্ষিক আয়ের প্রশংসাপত্র",
+                    "আধার কার্ড এবং ব্যাংক অ্যাকাউন্টের বিবরণ",
+                    "স্কুল ভর্তির রসিদ"
+                ],
+                "step_by_step_application_flow": [
+                    f"অফিসিয়াল পোর্টালে রেজিস্ট্রেশন করুন: {matched_sch['portal_url']}",
+                    "আয়ের শংসাপত্র ও মার্কশিট আপলোড করুন",
+                    "DBT-এর জন্য আধারের সাথে যুক্ত ব্যাংক অ্যাকাউন্ট যাচাই করুন"
+                ],
+                "expert_tip_to_win": "আবেদন বাতিল হওয়া এড়াতে বর্তমান আর্থিক বছরের বৈধ নথি জমা দিন।"
+            }
+        else:
+            guidance = {
+                "eligibility_verdict": f"You are eligible to apply for {matched_sch['name']}.",
+                "key_documents_to_prepare": matched_sch["required_documents"],
+                "step_by_step_application_flow": [
+                    f"Register on official portal: {matched_sch['portal_url']}",
+                    "Upload Income Certificate and Academic Marksheets",
+                    "Verify Aadhaar with linked Bank Account for Direct Benefit Transfer (DBT)"
+                ],
+                "expert_tip_to_win": "Ensure all documents are updated for the current financial year to avoid portal rejection."
+            }
 
     return {
         "status": "success",
         "scholarship_name": matched_sch["name"],
+        "language": target_lang,
         "guidance": guidance
     }
 
