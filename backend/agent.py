@@ -91,11 +91,11 @@ def classify_subject_and_grade(text: str, default_subject: str = "Physics", defa
         "integral", "derivative", "differentiat", "calculus", "matrix", "matrices", "determinant", 
         "quadratic", "polynomial", "algebra", "trigonometr", "sin(", "cos(", "tan(", "arctan", "dx", "limit",
         "probability", "vector", "pythagor", "geometry", "roots", "theorem", "log(", "power series",
-        "taylor series", "fourier series", "ap gp", "geometric progression", "\int", "∫",
+        "taylor series", "fourier series", "ap gp", "geometric progression", r"\int", "∫",
         "dy/dx", "partial fraction", "eigen", "differential equation", "binomial"
     ]
     if any(k in t for k in math_kw):
-        if any(k in t for k in ["integral", "derivative", "calculus", "matrix", "matrices", "determinant", "vector", "dx", "\int", "∫", "differential equation", "partial fraction", "arctan"]):
+        if any(k in t for k in ["integral", "derivative", "calculus", "matrix", "matrices", "determinant", "vector", "dx", r"\int", "∫", "differential equation", "partial fraction", "arctan"]):
             return "Mathematics", "Class 12"
         elif any(k in t for k in ["trigonometr", "sin(", "cos(", "polynomial", "quadratic", "pythagor"]):
             return "Mathematics", "Class 10"
@@ -488,16 +488,18 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
         citation = re.sub(r'\s+', ' ', citation).strip()
 
         prompt = (
-            f"You are a high-speed NCERT Socratic STEM Tutor for {grade_str} {subj_str}.\n"
+            f"You are a friendly, encouraging NCERT Socratic STEM Tutor for {grade_str} {subj_str}.\n"
             f"Student Problem / Work: '{extracted_text}'\n"
             f"Diagnosed Flaw / Misconception: '{error}'\n"
             f"Textbook Topic: '{chap_str}'\n\n"
-            "CRITICAL INSTRUCTIONS:\n"
-            "1. NO verbose conversational filler (DO NOT say 'That is an excellent application', 'Hello student', 'Can you articulate...'). Jump STRAIGHT into the hint.\n"
-            "2. Output EXACTLY 1 or 2 concise, powerful sentences using official NCERT textbook terminology (e.g. 'Cartesian Sign Convention', 'Integration by Substitution', 'Chain Rule', 'Kelvin Absolute Scale', 'Oxidation State Rules', 'Fleming\'s Left-Hand Rule', 'Thylakoid Membrane').\n"
-            "3. Give a direct, accurate conceptual hint that guides the student to correct their specific flawed step without giving away the final numerical solution.\n"
-            "4. Format all formulas and variables cleanly in LaTeX math (e.g. $u = x^2$, $du = 2x\\,dx$, $PV = nRT$, $T_K = T_C + 273.15$, $f = -15\\text{ cm}$).\n"
-            f"5. End with this exact citation at the end: {citation}\n"
+            "PEDAGOGICAL INSTRUCTIONS (MAKE IT SIMPLE & CLEAR FOR HIGH SCHOOL STUDENTS):\n"
+            "1. Speak in simple, crystal-clear, and encouraging language. Avoid heavy academic jargon.\n"
+            "2. Keep it to 2 short, easy-to-understand sentences:\n"
+            "   - Sentence 1: Point out the key rule or concept in simple terms (e.g. 'Take a look at your calculation: remember that in a concave mirror, light rays focus in front of the mirror...').\n"
+            "   - Sentence 2: Ask a clear guiding question that points them directly toward the right calculation or formula (e.g. 'What sign should you give to $f$ in the formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$?').\n"
+            "3. DO NOT give away the final numerical solution.\n"
+            "4. Format key variables and formulas in clean LaTeX math (e.g. $f = -10\\text{ cm}$, $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$).\n"
+            f"5. Include this exact citation at the end: {citation}\n"
         )
 
         try:
@@ -507,24 +509,28 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
             if citation not in final_response:
                 final_response += f" {citation}"
         except Exception:
-            # Dynamic conceptual fallback based on question domain
+            # Dynamic conceptual fallback based on question domain (Simple, friendly, step-by-step)
             txt_l = (extracted_text + " " + (error or "")).lower()
-            if "integral" in txt_l or "cos" in txt_l or "substitution" in txt_l or "dx" in txt_l:
-                q = "Recall that Integration by Substitution reverses the Chain Rule by letting $u = x^2$ so that $du = 2x\\,dx$. How does this transform your integral into $\\int \\cos(u)\\,du$?"
-            elif "lens" in txt_l or "screen" in txt_l:
-                q = "Using the Thin Lens Formula $\\frac{1}{f} = \\frac{1}{v} - \\frac{1}{u}$, what condition must the object distance ($u$) satisfy relative to focal length ($f$) to form a real image on a screen?"
-            elif "concave" in txt_l or "mirror" in txt_l or "sign" in txt_l:
-                q = "According to the Cartesian Sign Convention, why must the focal length ($f$) of a concave mirror always carry a negative sign in the Mirror Formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$?"
-            elif "gas" in txt_l or "pv" in txt_l or "temperature" in txt_l or "mole" in txt_l:
-                q = "In the Ideal Gas Equation $PV = nRT$, why must temperature always be converted to the absolute Kelvin scale ($T_K = T_C + 273.15$) before calculating moles?"
-            elif "redox" in txt_l or "oxidation" in txt_l or "cr2o7" in txt_l:
-                q = "In potassium dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), applying the Oxidation Number Rules gives total oxygen charge as $-14$ and potassium as $+2$. How is the remaining $+12$ divided between the two chromium atoms?"
-            elif "parallel" in txt_l or "resistor" in txt_l:
-                q = "For parallel resistors, Ohm's Law requires adding reciprocals: $\\frac{1}{R_{\\text{eq}}} = \\frac{1}{R_1} + \\frac{1}{R_2}$. Why is the equivalent resistance always smaller than the smallest individual resistor?"
-            elif "left hand" in txt_l or "magnetic" in txt_l or "force" in txt_l:
-                q = "According to Fleming's Left-Hand Rule, what do the Forefinger (Magnetic Field), Center Finger (Current), and Thumb represent when determining mechanical force?"
+            if "lcr" in txt_l or "inductor" in txt_l or "capacitor" in txt_l or "30v" in txt_l:
+                q = "In an AC circuit, inductor voltage ($V_L$) and capacitor voltage ($V_C$) oppose each other $180^\\circ$ out of phase. Instead of simply adding them, how does the phasor formula $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$ combine these voltages?"
+            elif "wave" in txt_l or "ydse" in txt_l or "mica" in txt_l or "fringe" in txt_l:
+                q = "Adding a mica sheet creates a path delay that shifts the entire pattern, but the fringe width $\\beta = \\frac{\\lambda D}{d}$ depends only on wavelength and slit distance. Why does the width of each fringe remain the exact same?"
+            elif "concave" in txt_l or "mirror" in txt_l or "15cm" in txt_l or "sign" in txt_l:
+                q = "Remember the sign convention: because a concave mirror focuses light in front of itself (to the left), its focal length is always negative ($f = -10\\text{ cm}$). How does using $f = -10\\text{ cm}$ in the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ change your calculation for $v$?"
+            elif "nernst" in txt_l or "galvanic" in txt_l or "ag+" in txt_l or "zn2+" in txt_l:
+                q = "Look at the balanced reaction $\\text{Zn} + 2\\text{Ag}^+ \\rightarrow \\text{Zn}^{2+} + 2\\text{Ag}$. In the Nernst reaction quotient $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, what power must you raise $[\\text{Ag}^+]$ to because of its coefficient 2?"
+            elif "redox" in txt_l or "oxidation" in txt_l or "cr2o7" in txt_l or "dichromate" in txt_l:
+                q = "In potassium dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), all charges balance to zero: $2(+1) + 2x + 7(-2) = 0$, giving $2x = +12$. Since there are two chromium atoms sharing this $+12$ charge, what is the oxidation number on each single chromium atom?"
+            elif "integral" in txt_l or "x^4" in txt_l or "rational" in txt_l:
+                q = "If you divide the numerator and denominator by $x^2$, the integral becomes $\\int \\frac{1 + 1/x^2}{(x - 1/x)^2 + 2}\\,dx$. What happens when you use the substitution $u = x - \\frac{1}{x}$ with $du = \\left(1 + \\frac{1}{x^2}\\right)dx$?"
+            elif "tan^-1" in txt_l or "cos x - sin x" in txt_l or "inverse trig" in txt_l:
+                q = "Before differentiating, try dividing top and bottom by $\\cos(x)$ to get $y = \\tan^{-1}\\left(\\tan\\left(\\frac{\\pi}{4} - x\\right)\\right) = \\frac{\\pi}{4} - x$. How much easier does this make finding $\\frac{dy}{dx}$?"
+            elif "photosynthesis" in txt_l or "calvin" in txt_l or "z-scheme" in txt_l:
+                q = "Cyclic photophosphorylation in the stroma lamellae uses only Photosystem I (PS-I) to generate $\\text{ATP}$. Why is non-cyclic photophosphorylation (Z-scheme) needed to produce $\\text{NADPH}$ for the Calvin cycle?"
+            elif "lac" in txt_l or "operon" in txt_l or "repressor" in txt_l:
+                q = "In the Lac Operon, the repressor protein naturally blocks RNA polymerase when lactose is absent. What happens to the repressor when allolactose binds to it as an inducer?"
             else:
-                q = f"Which standard NCERT formula or conservation law from {chap_str} governs the relationship between the quantities in this problem?"
+                q = f"Take a look at the given values in {chap_str}. Which standard formula connects these quantities, and what is the first step you should take?"
             final_response = f"{q} {citation}".strip()
 
     logs.append({

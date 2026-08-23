@@ -6,6 +6,7 @@ import { ScholarshipMatcher } from './components/ScholarshipMatcher';
 import { LandingPage } from './components/LandingPage';
 import { CustomCursor } from './components/CustomCursor';
 import { InteractiveBackground } from './components/InteractiveBackground';
+import { DEFAULT_PRESETS } from './constants/presets';
 
 const API_BASE_URL = 'https://socratic-ai-tutor-gwot.onrender.com';
 
@@ -14,7 +15,7 @@ export function App() {
   const [activeTab, setActiveTab] = useState<'student' | 'teacher' | 'scholarships'>('student');
   const [apiConnected, setApiConnected] = useState<boolean>(false);
   const [totalChunks, setTotalChunks] = useState<number>(14);
-  const [presets, setPresets] = useState<Record<string, any>>({});
+  const [presets, setPresets] = useState<Record<string, any>>(DEFAULT_PRESETS);
 
   // Check backend health and fetch presets/ncert info on mount
   useEffect(() => {
@@ -32,7 +33,9 @@ export function App() {
         const presetsRes = await fetch(`${API_BASE_URL}/api/presets`);
         if (presetsRes.ok) {
           const presetsData = await presetsRes.json();
-          setPresets(presetsData);
+          if (Object.keys(presetsData).length > 0) {
+            setPresets(presetsData);
+          }
         }
       } catch (err) {
         setApiConnected(false);

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Upload, RefreshCw, BookOpen, AlertCircle, Volume2, FileText, User, BookMarked, GraduationCap, ArrowUpRight, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Upload, RefreshCw, BookOpen, AlertCircle, Volume2, FileText, User, BookMarked, GraduationCap, ArrowUpRight, Eye, EyeOff, Sparkles, Pause, Play, Square } from 'lucide-react';
 import { MCQQuizModule } from './MCQQuizModule';
 import { MathText } from './MathText';
 import { ThinkingEngine } from './ThinkingEngine';
 import { SpatialErrorPointer } from './SpatialErrorPointer';
+import { DEFAULT_PRESETS } from '../constants/presets';
 
 interface Message {
   id: string;
@@ -25,7 +26,7 @@ interface StudentViewProps {
   apiBaseUrl?: string;
 }
 
-export const StudentView: React.FC<StudentViewProps> = ({ presets, onSolveComplete, apiBaseUrl = 'http://localhost:8000' }) => {
+export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRESETS, onSolveComplete, apiBaseUrl = 'http://localhost:8000' }) => {
   const [studentName, setStudentName] = useState('Aarav Sharma');
   const [classGrade, setClassGrade] = useState('Class 10');
   const [subjectName, setSubjectName] = useState('Physics');
@@ -41,6 +42,16 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets, onSolveComple
   const [autoDetectLabel, setAutoDetectLabel] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
+  const [audioState, setAudioState] = useState<{
+    isPlaying: boolean;
+    isPaused: boolean;
+    currentMessageId: string | null;
+  }>({
+    isPlaying: false,
+    isPaused: false,
+    currentMessageId: null
+  });
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init_1',
@@ -182,10 +193,10 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets, onSolveComple
   };
 
   const handleSelectPreset = (presetKey: string) => {
-    const preset = presets[presetKey];
+    const preset = activePresets[presetKey];
     if (!preset) return;
     setSelectedPreset(presetKey);
-    setUserText(preset.description || preset.handwritten_text);
+    setUserText(preset.description || (preset as any).handwritten_text || '');
     if (preset.class_grade) setClassGrade(preset.class_grade.includes('11') ? 'Class 11' : preset.class_grade.includes('12') ? 'Class 12' : 'Class 10');
     if (preset.subject) setSubjectName(preset.subject);
     setIsAutoDetected(true);
@@ -198,7 +209,7 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets, onSolveComple
     if (!userText.trim() && !uploadedFile && !selectedPreset) return;
 
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const userMsgText = userText.trim() || (selectedPreset ? presets[selectedPreset]?.description : 'Uploaded Assignment');
+    const userMsgText = userText.trim() || (selectedPreset ? activePresets[selectedPreset]?.description : 'Uploaded Assignment');
 
     const newStudentMsg: Message = {
       id: `msg_${Date.now()}`,
@@ -264,20 +275,73 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets, onSolveComple
     }
   };
 
-  const speakText = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.95;
-      window.speechSynthesis.speak(utterance);
-    }
+  const cleanTextForSpeech = (raw: string) => {
+    let s = raw || '';
+    // Remove reference citation for natural speech
+    s = s.replace(/\(Ref:[^)]+\)/gi, '');
+    // Simplify common mathematical expressions for clear audio viva
+    s = s.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1 over $2');
+    s = s.replace(/\\sqrt\{([^}]+)\}/g, 'square root of $1');
+    s = s.replace(/\\tan\^\{-1\}/g, 'inverse tangent ');
+    s = s.replace(/\\sin/g, 'sine');
+    s = s.replace(/\\cos/g, 'cosine');
+    s = s.replace(/\\tan/g, 'tangent');
+    s = s.replace(/\\int/g, 'integral of');
+    s = s.replace(/\\text\{([^}]+)\}/g, '$1');
+    s = s.replace(/[\$\\\{\}\^_\`]/g, ' ');
+    s = s.replace(/\s+/g, ' ').trim();
+    return s;
   };
 
-  // Filter presets by subject
-  const presetKeys = Object.keys(presets);
+  const handlePlayAudio = (msgId: string, text: string) => {
+    if (!('speechSynthesis' in window)) return;
+
+    if (audioState.currentMessageId === msgId && audioState.isPlaying) {
+      if (audioState.isPaused) {
+        window.speechSynthesis.resume();
+        setAudioState({ isPlaying: true, isPaused: false, currentMessageId: msgId });
+      } else {
+        window.speechSynthesis.pause();
+        setAudioState({ isPlaying: true, isPaused: true, currentMessageId: msgId });
+      }
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const cleanText = cleanTextForSpeech(text);
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 0.92;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+      setAudioState({ isPlaying: true, isPaused: false, currentMessageId: msgId });
+    };
+
+    utterance.onend = () => {
+      setAudioState({ isPlaying: false, isPaused: false, currentMessageId: null });
+    };
+
+    utterance.onerror = () => {
+      setAudioState({ isPlaying: false, isPaused: false, currentMessageId: null });
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopAudio = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setAudioState({ isPlaying: false, isPaused: false, currentMessageId: null });
+  };
+
+  // Filter presets by subject (Instant 0ms Fallback)
+  const activePresets = (presets && Object.keys(presets).length > 0) ? presets : DEFAULT_PRESETS;
+  const presetKeys = Object.keys(activePresets);
   const filteredPresetKeys = presetKeys.filter((key) => {
     if (presetSubjectFilter === 'All') return true;
-    const p = presets[key];
-    return p.subject && p.subject.toLowerCase().includes(presetSubjectFilter.toLowerCase());
+    const p = activePresets[key];
+    return p && p.subject && p.subject.toLowerCase().includes(presetSubjectFilter.toLowerCase());
   });
 
   const getSubjectEmoji = (subj: string) => {
@@ -522,7 +586,7 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets, onSolveComple
                 }}
               >
                 {filteredPresetKeys.map((key) => {
-                  const p = presets[key];
+                  const p = activePresets[key];
                   const isSelected = selectedPreset === key;
                   const emoji = getSubjectEmoji(p.subject || '');
                   return (
@@ -784,15 +848,61 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets, onSolveComple
                         </div>
                       ) : <span />}
 
-                      <button
-                        onClick={() => speakText(msg.text || '')}
-                        data-cursor-text="AUDIO"
-                        className="agency-pill"
-                        style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.06)' }}
-                      >
-                        <Volume2 size={12} color="#00f0ff" />
-                        <span>Listen Audio</span>
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          onClick={() => handlePlayAudio(msg.id, msg.text || '')}
+                          data-cursor-text="AUDIO"
+                          className="agency-pill"
+                          style={{
+                            cursor: 'pointer',
+                            background: audioState.currentMessageId === msg.id && audioState.isPlaying
+                              ? 'rgba(0, 240, 255, 0.2)'
+                              : 'rgba(255,255,255,0.06)',
+                            color: audioState.currentMessageId === msg.id && audioState.isPlaying
+                              ? 'var(--neon-cyan)'
+                              : 'var(--ice-white)',
+                            borderColor: audioState.currentMessageId === msg.id && audioState.isPlaying
+                              ? 'var(--neon-cyan)'
+                              : 'var(--border-subtle)'
+                          }}
+                        >
+                          {audioState.currentMessageId === msg.id && audioState.isPlaying ? (
+                            audioState.isPaused ? (
+                              <>
+                                <Play size={12} color="#00ffa3" />
+                                <span>Resume Audio</span>
+                              </>
+                            ) : (
+                              <>
+                                <Pause size={12} color="#00f0ff" />
+                                <span>Pause Audio</span>
+                              </>
+                            )
+                          ) : (
+                            <>
+                              <Volume2 size={12} color="#00f0ff" />
+                              <span>Listen Audio</span>
+                            </>
+                          )}
+                        </button>
+
+                        {audioState.currentMessageId === msg.id && audioState.isPlaying && (
+                          <button
+                            onClick={handleStopAudio}
+                            data-cursor-text="STOP"
+                            className="agency-pill"
+                            style={{
+                              cursor: 'pointer',
+                              background: 'rgba(255, 51, 102, 0.15)',
+                              color: '#ff3366',
+                              borderColor: 'rgba(255, 51, 102, 0.4)'
+                            }}
+                          >
+                            <Square size={10} color="#ff3366" />
+                            <span>Stop</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
