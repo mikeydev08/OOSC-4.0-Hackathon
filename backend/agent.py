@@ -125,14 +125,16 @@ def call_gemini(prompt: str, image_data: Optional[str] = None, preferred_model: 
                 contents.append(part)
             contents.append(prompt)
 
-            # Active supported Gemini models
+            # Active supported Gemini models with fallback across active quotas
             candidate_models = [
+                "gemini-3.1-flash-lite",
                 preferred_model,
+                "gemini-3.5-flash-lite",
+                "gemini-flash-lite-latest",
                 "gemini-3.6-flash",
                 "gemini-3.5-flash",
-                "gemini-2.5-flash-lite",
-                "gemini-flash-latest",
                 "gemini-3.7-flash",
+                "gemini-flash-latest",
                 "gemini-2.5-flash"
             ]
             for m in candidate_models:
