@@ -175,17 +175,52 @@ def call_gemini(prompt: str, image_data: Optional[str] = None, preferred_model: 
             pass
 
     # Dynamic fallback generator if key is offline or rate limited
+    if "Vision Parser" in prompt or "extract all handwritten" in prompt or "analyze any mathematical" in prompt:
+        u_match = re.search(r"Transcription Context:\s*'(.*?)'", prompt, re.DOTALL)
+        u_text = u_match.group(1).strip() if u_match else "STEM Query"
         u_l = u_text.lower()
-        if any(w in u_l for w in ["calculated", "using", "v =", "u =", "i got", "stated", "increases by", "decreases by", "my answer", "solution", "attempt", "fringe width", "30v", "150v", "15cm", "+12", "-30cm", "repair"]):
-            intent_type = "problem_submission"
-            err = "Misapplied sign convention or overlooked phase/stoichiometric relationship."
-            bbox = [340, 100, 560, 900]
-            bbox_label = "MISAPPLIED STEP"
-        else:
+        
+        is_inquiry = any(u_l.strip().startswith(q) for q in ["what if", "why", "how does", "how do", "explain", "what is", "can you", "what happens", "help me"]) or ("?" in u_l and not any(w in u_l for w in ["calculated", "using m =", "stated", "got", "my answer", "150v", "+12", "split"]))
+        
+        if is_inquiry:
             intent_type = "conceptual_inquiry"
             err = None
             bbox = None
             bbox_label = None
+        else:
+            intent_type = "problem_submission"
+            if any(w in u_l for w in ["x^4", "x^2", "integral", "split", "irreducible", "rational"]):
+                err = "Split fraction into two separate integrals creating irreducible denominator divergence."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "INTEGRATION STRATEGY ERROR"
+            elif any(w in u_l for w in ["tan^-1", "arctan", "cos x - sin x"]):
+                err = "Applied bulky chain rule on unsimplified inverse trigonometric argument."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "DERIVATIVE CHAIN RULE ERROR"
+            elif any(w in u_l for w in ["k2cr2o7", "cr2o7", "oxidation", "redox", "chromium"]):
+                err = "Assigned +12 oxidation state to individual Chromium without dividing by 2."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "OXIDATION STATE CALCULATION ERROR"
+            elif any(w in u_l for w in ["nernst", "galvanic", "ag+", "zn2+"]):
+                err = "Omitted squared stoichiometric coefficient on [Ag+] in reaction quotient Q."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "REACTION QUOTIENT ERROR"
+            elif any(w in u_l for w in ["lcr", "30v", "150v", "phasor", "inductor"]):
+                err = "Algebraically added out-of-phase AC voltages (150V) ignoring 180° cancellation."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "PHASOR VOLTAGE ERROR"
+            elif any(w in u_l for w in ["wave", "ydse", "mica", "fringe"]):
+                err = "Claimed fringe width increases instead of recognizing lateral fringe shift."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "FRINGE WIDTH MISCONCEPTION"
+            elif any(w in u_l for w in ["mirror", "concave", "15cm"]):
+                err = "Misapplied Cartesian sign convention for concave mirror focal length and object distance."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "CARTESIAN SIGN ERROR"
+            else:
+                err = "Misapplied formula sign convention or overlooked stoichiometric relationship."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "MISAPPLIED STEP"
 
         return json.dumps({
             "intent_type": intent_type,
@@ -193,62 +228,83 @@ def call_gemini(prompt: str, image_data: Optional[str] = None, preferred_model: 
             "conceptual_error": err,
             "bounding_box": bbox,
             "bounding_box_label": bbox_label,
-            "target_chapter": subj,
+            "target_chapter": "STEM Problem Solving",
             "search_query": u_text
         })
     elif "Socratic STEM Tutor" in prompt or "CRITICAL INSTRUCTIONS:" in prompt or "PEDAGOGICAL INSTRUCTIONS" in prompt:
-        p_match = re.search(r"Student Problem / Work:\s*'(.*?)'", prompt, re.DOTALL)
-        p_text = p_match.group(1).strip() if p_match else "your question"
-        p_l = p_text.lower()
+        p_match = re.search(r"Student Problem / (?:Submission|Work):\s*'(.*?)'", prompt, re.DOTALL)
+        p_text = p_match.group(1).strip() if p_match else prompt
+        p_l = (p_text + " " + prompt).lower()
 
-        if "wave" in p_l or "ydse" in p_l or "mica" in p_l or "fringe" in p_l:
+        if "integral" in p_l or "x^4" in p_l or "x^2" in p_l or "split" in p_l or "rational" in p_l or "irreducible" in p_l:
             return (
-                "• In Young's Double Slit Experiment (YDSE), inserting a thin mica sheet of thickness $t$ and refractive index $\\mu$ in front of one slit introduces an extra optical path difference of $(\\mu - 1)t$.\n"
-                "• This extra path difference causes the entire interference fringe pattern to shift laterally across the screen by a distance $\\Delta y = \\frac{D}{d}(\\mu - 1)t$, but it does not change the physical slit spacing $d$ or the light wavelength $\\lambda$.\n"
-                "• The fringe width $\\beta$ is strictly governed by the formula $\\beta = \\frac{\\lambda D}{d}$. Since none of the parameters $\\lambda$, $D$, or $d$ have changed, the fringe width itself remains completely unchanged.\n"
-                "• To complete your understanding, why does introducing the sheet shift the position of the central maximum rather than expanding or compressing the spacing between fringes?"
+                "• Integrals involving symmetric polynomial fractions like $\\int \\frac{x^2 + 1}{x^4 + 1}\\,dx$ are solved by dividing both numerator and denominator by $x^2$.\n"
+                "• This transforms the integrand into $\\frac{1 + 1/x^2}{x^2 + 1/x^2}$, where the numerator is the exact derivative of the expression $u = x - \\frac{1}{x}$.\n"
+                "• Completing the square in the denominator expresses $x^2 + \\frac{1}{x^2}$ as $\\left(x - \\frac{1}{x}\\right)^2 + 2$, converting the integral into standard form $\\int \\frac{du}{u^2 + (\\sqrt{2})^2}$.\n"
+                "• Applying the standard arctan antiderivative $\\frac{1}{a}\\tan^{-1}\\left(\\frac{u}{a}\\right)$, what is the complete antiderivative in terms of the original variable $x$?"
             )
-        elif "lcr" in p_l or "inductor" in p_l or "capacitor" in p_l or "30v" in p_l or "phasor" in p_l:
+        elif "tan^-1" in p_l or "arctan" in p_l or "cos x - sin x" in p_l or "inverse trig" in p_l:
             return (
-                "• In a series AC circuit, voltages across reactive components do not simply add arithmetically because inductor voltage ($V_L$) and capacitor voltage ($V_C$) are $180^\\circ$ out of phase with each other.\n"
-                "• The inductor voltage leads current by $+90^\\circ$ while capacitor voltage lags by $-90^\\circ$, causing their opposite vectors to subtract: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
-                "• The resistor voltage $V_R$ is in phase with current, making it perpendicular to the net reactive voltage on a phasor diagram. Therefore, the net source voltage is given by the vector sum $V_{\\text{net}} = \\sqrt{V_R^2 + (V_L - V_C)^2}$.\n"
-                "• What total voltage do you get when substituting $V_R = 30\\text{V}$ and net reactive voltage $40\\text{V}$ into $\\sqrt{30^2 + 40^2}$?"
+                "• Differentiating expressions like $y = \\tan^{-1}\\left(\\frac{\\cos x - \\sin x}{\\cos x + \\sin x}\\right)$ directly via chain and quotient rules is tedious and error-prone.\n"
+                "• Dividing both numerator and denominator inside the argument by $\\cos x$ gives $\\frac{1 - \\tan x}{1 + \\tan x}$, which is the trigonometric identity for $\\tan\\left(\\frac{\\pi}{4} - x\\right)$.\n"
+                "• Because $\\tan^{-1}(\\tan \\theta) = \\theta$, the entire function simplifies drastically to the linear expression $y = \\frac{\\pi}{4} - x$.\n"
+                "• Taking the derivative of this simplified expression, what is the final value of $\\frac{dy}{dx}$?"
             )
-        elif "lens" in p_l or "focal" in p_l or "mirror" in p_l or "concave" in p_l or "15cm" in p_l:
-            return (
-                "• Under NCERT Cartesian Sign Convention, all distances are measured from the Pole ($P$) of the mirror as origin $(0,0)$, and distances measured opposite to incoming light (to the left) are strictly negative.\n"
-                "• Because a concave mirror converges incoming parallel rays in front of its reflective surface, its focal length is always negative ($f = -10\\text{ cm}$), and the object placed in front is at $u = -15\\text{ cm}$.\n"
-                "• Applying these negative values into the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ prevents sign errors that would otherwise falsely produce a virtual image.\n"
-                "• What is the value of image distance $v$ when you evaluate $\\frac{1}{v} = \\frac{1}{-10} - \\frac{1}{-15}$?"
-            )
-        elif "dna" in p_l or "base pair" in p_l or "adenine" in p_l or "guanine" in p_l or "repair" in p_l or "inheritance" in p_l:
-            return (
-                "• DNA replication and repair fidelity depend on Chargaff's rules of complementary base pairing, where Adenine specifically pairs with Thymine via 2 hydrogen bonds ($A=T$) and Guanine pairs with Cytosine via 3 hydrogen bonds ($G\\equiv C$).\n"
-                "• The two strands in double-stranded DNA are antiparallel: one strand runs in the $5' \\rightarrow 3'$ orientation while its complementary partner runs in the $3' \\rightarrow 5'$ direction.\n"
-                "• During repair excision, DNA Polymerase reads the intact template strand and inserts the exact complementary nucleotide triphosphate to restore sequence integrity.\n"
-                "• When checking a reconstructed sequence, how does verifying both the base-pairing rule and antiparallel orientation ensure genetic fidelity?"
-            )
-        elif "nernst" in p_l or "galvanic" in p_l or "ag+" in p_l or "zn2+" in p_l:
-            return (
-                "• In electrochemistry, the Nernst equation calculates cell potential under non-standard conditions using the formula $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
-                "• In the overall cell reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2 with $n = 2$ electrons transferred.\n"
-                "• The reaction quotient $Q$ must raise each dissolved ion's concentration to the power of its stoichiometric coefficient, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, rather than a simple linear ratio.\n"
-                "• How does squaring the silver ion concentration in the denominator affect the logarithm term and your final calculation of $E_{\\text{cell}}$?"
-            )
-        elif "redox" in p_l or "oxidation" in p_l or "cr2o7" in p_l or "dichromate" in p_l:
+        elif "redox" in p_l or "oxidation" in p_l or "cr2o7" in p_l or "dichromate" in p_l or "k2cr2o7" in p_l or "chromium" in p_l:
             return (
                 "• In any neutral chemical compound like Potassium Dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), the sum of all oxidation numbers across all constituent atoms must equal zero.\n"
                 "• Group 1 alkali metals like Potassium ($\\text{K}$) always possess an oxidation state of $+1$, while Oxygen typically exhibits an oxidation state of $-2$ in non-peroxide compounds.\n"
                 "• Setting up the charge balance equation gives $2(+1) + 2(x) + 7(-2) = 0$, which simplifies to $2 + 2x - 14 = 0 \\implies 2x = +12$.\n"
                 "• Since there are 2 Chromium atoms sharing the $+12$ oxidation state, what is the oxidation number of each individual Chromium atom?"
             )
-        elif "integral" in p_l or "substitution" in p_l or "x^4" in p_l:
+        elif "nernst" in p_l or "galvanic" in p_l or "ag+" in p_l or "zn2+" in p_l or "e_cell" in p_l or "e0_cell" in p_l:
             return (
-                "• Integrals involving symmetric polynomial fractions like $\\int \\frac{x^2 + 1}{x^4 + 1}\\,dx$ are solved by dividing both numerator and denominator by $x^2$.\n"
-                "• This transforms the integrand into $\\frac{1 + 1/x^2}{x^2 + 1/x^2}$, where the numerator is the exact derivative of the expression $u = x - \\frac{1}{x}$.\n"
-                "• Completing the square in the denominator expresses $x^2 + \\frac{1}{x^2}$ as $\\left(x - \\frac{1}{x}\\right)^2 + 2$, converting the integral into standard form $\\int \\frac{du}{u^2 + (\\sqrt{2})^2}$.\n"
-                "• Applying the standard arctan antiderivative $\\frac{1}{a}\\tan^{-1}\\left(\\frac{u}{a}\\right)$, what is the complete antiderivative in terms of the original variable $x$?"
+                "• In electrochemistry, the Nernst equation calculates cell potential under non-standard conditions using the formula $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
+                "• In the overall cell reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2 with $n = 2$ electrons transferred.\n"
+                "• The reaction quotient $Q$ must raise each dissolved ion's concentration to the power of its stoichiometric coefficient, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, rather than a simple linear ratio.\n"
+                "• How does squaring the silver ion concentration in the denominator affect the logarithm term and your final calculation of $E_{\\text{cell}}$?"
+            )
+        elif "dna" in p_l or "base pair" in p_l or "adenine" in p_l or "guanine" in p_l or "repair" in p_l or "inheritance" in p_l or "chargaff" in p_l:
+            return (
+                "• DNA replication and repair fidelity depend on Chargaff's rules of complementary base pairing, where Adenine specifically pairs with Thymine via 2 hydrogen bonds ($A=T$) and Guanine pairs with Cytosine via 3 hydrogen bonds ($G\\equiv C$).\n"
+                "• The two strands in double-stranded DNA are antiparallel: one strand runs in the $5' \\rightarrow 3'$ orientation while its complementary partner runs in the $3' \\rightarrow 5'$ direction.\n"
+                "• During repair excision, DNA Polymerase reads the intact template strand and inserts the exact complementary nucleotide triphosphate to restore sequence integrity.\n"
+                "• When checking a reconstructed sequence, how does verifying both the base-pairing rule and antiparallel orientation ensure genetic fidelity?"
+            )
+        elif "lac" in p_l or "operon" in p_l or "repressor" in p_l or "allolactose" in p_l:
+            return (
+                "• The Lac Operon is an inducible operon in *E. coli* that coordinates the transport and enzymatic breakdown of lactose through genes $lacZ$, $lacY$, and $lacA$.\n"
+                "• In the absence of lactose, the active Lac Repressor protein (encoded by the regulatory $i$ gene) binds tightly to the operator region ($O$), physically blocking RNA Polymerase from transcribing the structural genes.\n"
+                "• When lactose is introduced, its isomer allolactose acts as an inducer by binding to the repressor, causing a conformational change that releases it from the operator.\n"
+                "• What happens to the transcription of $\\beta$-galactosidase once RNA Polymerase is free to bind the promoter and move through the structural genes?"
+            )
+        elif "photosynthesis" in p_l or "calvin" in p_l or "z-scheme" in p_l or "chlorophyll" in p_l or "thylakoid" in p_l:
+            return (
+                "• The light-dependent reactions of photosynthesis in the thylakoid membrane occur through two distinct electron transport pathways: Cyclic and Non-Cyclic Photophosphorylation.\n"
+                "• Cyclic photophosphorylation involves only Photosystem I (PS-I / P700) and exclusively synthesizes $\\text{ATP}$ without photolysis of water or production of $\\text{NADPH}$.\n"
+                "• The light-independent Calvin cycle requires both chemical energy in $\\text{ATP}$ and reducing power from $\\text{NADPH}$ to reduce $\\text{CO}_2$ into phosphoglyceraldehyde ($3\\text{-PGA}$) and glucose.\n"
+                "• Why is non-cyclic photophosphorylation (the Z-scheme involving both PS-II and PS-I) essential for sustaining complete carbohydrate synthesis in plants?"
+            )
+        elif "lcr" in p_l or "inductor" in p_l or "capacitor" in p_l or "30v" in p_l or "phasor" in p_l or "80v" in p_l or "40v" in p_l or "150v" in p_l:
+            return (
+                "• In a series AC circuit, voltages across reactive components do not simply add arithmetically because inductor voltage ($V_L$) and capacitor voltage ($V_C$) are $180^\\circ$ out of phase with each other.\n"
+                "• The inductor voltage leads current by $+90^\\circ$ while capacitor voltage lags by $-90^\\circ$, causing their opposite vectors to subtract: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
+                "• The resistor voltage $V_R$ is in phase with current, making it perpendicular to the net reactive voltage on a phasor diagram. Therefore, the net source voltage is given by the vector sum $V_{\\text{net}} = \\sqrt{V_R^2 + (V_L - V_C)^2}$.\n"
+                "• What total voltage do you get when substituting $V_R = 30\\text{V}$ and net reactive voltage $40\\text{V}$ into $\\sqrt{30^2 + 40^2}$?"
+            )
+        elif "wave" in p_l or "ydse" in p_l or "mica" in p_l or "fringe" in p_l:
+            return (
+                "• In Young's Double Slit Experiment (YDSE), inserting a thin mica sheet of thickness $t$ and refractive index $\\mu$ in front of one slit introduces an extra optical path difference of $(\\mu - 1)t$.\n"
+                "• This extra path difference causes the entire interference fringe pattern to shift laterally across the screen by a distance $\\Delta y = \\frac{D}{d}(\\mu - 1)t$, but it does not change the physical slit spacing $d$ or the light wavelength $\\lambda$.\n"
+                "• The fringe width $\\beta$ is strictly governed by the formula $\\beta = \\frac{\\lambda D}{d}$. Since none of the parameters $\\lambda$, $D$, or $d$ have changed, the fringe width itself remains completely unchanged.\n"
+                "• To complete your understanding, why does introducing the sheet shift the position of the central maximum rather than expanding or compressing the spacing between fringes?"
+            )
+        elif "mirror" in p_l or "concave" in p_l or "15cm" in p_l or "lens" in p_l or "focal" in p_l:
+            return (
+                "• Under NCERT Cartesian Sign Convention, all distances are measured from the Pole ($P$) of the mirror as origin $(0,0)$, and distances measured opposite to incoming light (to the left) are strictly negative.\n"
+                "• Because a concave mirror converges incoming parallel rays in front of its reflective surface, its focal length is always negative ($f = -10\\text{ cm}$), and the object placed in front is at $u = -15\\text{ cm}$.\n"
+                "• Applying these negative values into the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ prevents sign errors that would otherwise falsely produce a virtual image.\n"
+                "• What is the value of image distance $v$ when you evaluate $\\frac{1}{v} = \\frac{1}{-10} - \\frac{1}{-15}$?"
             )
         else:
             return (

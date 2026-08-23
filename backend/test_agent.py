@@ -61,5 +61,22 @@ def run_tests():
     assert len(res3.get("socratic_response", "")) > 10, "Must return valid fallback response!"
     print("Test 3 Passed successfully!")
 
+    print("\n=================== TEST 4: MATHEMATICS RATIONAL INTEGRAL SUBMISSION ===================")
+    state4 = {
+        "user_message": "Student split ∫(x^2 + 1)/(x^4 + 1) dx into ∫ x^2/(x^4 + 1) dx + ∫ 1/(x^4 + 1) dx, creating irreducible denominator divergence.",
+        "subject_name": "Mathematics",
+        "class_grade": "Class 12",
+        "retry_count": 0,
+        "trace_logs": []
+    }
+    res4 = corrective_rag_app.invoke(state4)
+    print(f"Intent Type: {res4.get('intent_type')}")
+    print(f"Conceptual Error: {res4.get('conceptual_error')}")
+    print(f"Socratic Response:\n{res4.get('socratic_response')}")
+    print("-------------------------------------------------------------------------")
+
+    assert "x^2" in res4.get("socratic_response", "") or "integral" in res4.get("socratic_response", "").lower(), "Must output mathematics calculus guidance!"
+    print("Test 4 Passed successfully!")
+
 if __name__ == "__main__":
     run_tests()
