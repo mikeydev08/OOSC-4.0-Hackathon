@@ -123,7 +123,7 @@ export const ThinkingEngine: React.FC<ThinkingEngineProps> = ({ classGrade = 'Cl
           </span>
 
           <span className="agency-pill active" style={{ padding: '3px 10px', fontSize: '0.65rem' }}>
-            <span>{classGrade.toUpperCase()} • {subjectName.toUpperCase()}</span>
+            <span>{(classGrade || 'Class 10').replace(/Class\s*Class/gi, 'Class').toUpperCase()} • {(subjectName || 'Physics').replace(/Class\s*\d+\s*/gi, '').toUpperCase()}</span>
           </span>
         </div>
       </div>

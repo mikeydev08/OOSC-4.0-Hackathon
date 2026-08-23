@@ -149,7 +149,7 @@ export const MCQQuizModule: React.FC<MCQQuizModuleProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           student_name: studentName,
-          subject_name: `${classGrade} ${subjectName}`,
+          subject_name: (subjectName || 'Physics').replace(/Class\s*\d+\s*/gi, '').trim(),
           chapter_name: currentQ.chapter_name,
           topic: currentQ.topic,
           question: currentQ.question,

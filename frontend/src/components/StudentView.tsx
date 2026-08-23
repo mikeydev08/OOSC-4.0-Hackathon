@@ -254,7 +254,7 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
       const formData = new FormData();
       formData.append('student_name', studentName || 'Student');
       formData.append('class_grade', classGrade || 'Class 10');
-      formData.append('subject_name', `${classGrade} ${subjectName}`);
+      formData.append('subject_name', (subjectName || 'Physics').replace(/Class\s*\d+\s*/gi, '').trim());
       formData.append('submission_source', 'Uploaded Assignment (PDF/Image)');
 
       if (userMsgText) formData.append('user_message', userMsgText);
@@ -786,7 +786,7 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                         [ INCOMING STUDENT SUBMISSION ]
                       </span>
                       <span className="agency-pill" style={{ fontSize: '0.65rem' }}>
-                        {classGrade.toUpperCase()} • {subjectName.toUpperCase()}
+                        {(classGrade || 'Class 10').replace(/Class\s*Class/gi, 'Class').toUpperCase()} • {(subjectName || 'Physics').replace(/Class\s*\d+\s*/gi, '').toUpperCase()}
                       </span>
                     </div>
 
