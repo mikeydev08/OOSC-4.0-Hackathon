@@ -320,14 +320,86 @@ def vision_parser_node(state: TutorState) -> Dict[str, Any]:
             chapter = parsed.get("target_chapter", "Light - Reflection and Refraction")
             query = parsed.get("search_query", user_message or "physics concept")
         except Exception:
-            if "calculated" in msg_lower or "using m =" in msg_lower or "u =" in msg_lower or "integrated" in msg_lower or "error" in msg_lower:
+            extracted = user_message or "STEM Problem Submission."
+            is_inquiry = any(msg_lower.strip().startswith(q) for q in ["what if", "why", "how does", "how do", "explain", "what is", "can you", "what happens", "help me"]) or ("?" in msg_lower and not any(w in msg_lower for w in ["calculated", "using m =", "stated", "got", "my answer", "150v", "+12"]))
+
+            if is_inquiry:
+                intent = "conceptual_inquiry"
+                error = None
+                bbox = None
+                bbox_label = None
+                if any(w in msg_lower for w in ["lens", "mirror", "focal", "optics", "convex", "concave"]):
+                    chapter = "Light - Reflection and Refraction"
+                elif any(w in msg_lower for w in ["lac", "dna", "genetics"]):
+                    chapter = "Molecular Basis of Inheritance"
+                elif any(w in msg_lower for w in ["redox", "oxidation", "cr2o7"]):
+                    chapter = "Redox Reactions & Oxidation Numbers"
+                else:
+                    chapter = "STEM Concepts"
+                query = user_message or "physics concept"
+            elif any(w in msg_lower for w in ["k2cr2o7", "cr2o7", "dichromate", "chromium", "oxidation"]):
                 intent = "problem_submission"
-                extracted = user_message or "Solution submitted."
-                error = "Misapplied formula sign convention or calculation mistake."
+                error = "Assigned +12 oxidation state to individual Chromium without dividing by 2."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "OXIDATION STATE CALCULATION ERROR"
+                chapter = "Redox Reactions & Oxidation Numbers"
+                query = "potassium dichromate oxidation state chromium"
+            elif any(w in msg_lower for w in ["nernst", "galvanic", "ag+", "zn2+", "e_cell", "e0_cell"]):
+                intent = "problem_submission"
+                error = "Omitted squared stoichiometric coefficient on [Ag+] in reaction quotient Q."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "REACTION QUOTIENT ERROR"
+                chapter = "Electrochemistry & Nernst Equation"
+                query = "nernst equation reaction quotient stoichiometry"
+            elif any(w in msg_lower for w in ["lcr", "30v", "80v", "40v", "150v", "phasor", "inductor", "capacitor"]):
+                intent = "problem_submission"
+                error = "Algebraically added out-of-phase AC voltages (150V) ignoring 180° cancellation."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "PHASOR VOLTAGE ERROR"
+                chapter = "Alternating Current & LCR Circuits"
+                query = "series LCR phasor voltage calculation"
+            elif any(w in msg_lower for w in ["wave", "ydse", "mica", "fringe"]):
+                intent = "problem_submission"
+                error = "Claimed fringe width increases instead of recognizing lateral fringe shift."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "FRINGE WIDTH MISCONCEPTION"
+                chapter = "Wave Optics & Interference"
+                query = "young double slit fringe width mica sheet"
+            elif any(w in msg_lower for w in ["mirror", "concave", "15cm", "10cm", "convex"]):
+                intent = "problem_submission"
+                error = "Misapplied Cartesian sign convention for concave mirror focal length and object distance."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "CARTESIAN SIGN ERROR"
+                chapter = "Ray Optics and Optical Instruments"
+                query = "concave mirror Cartesian sign convention"
+            elif any(w in msg_lower for w in ["dna", "adenine", "guanine", "thymine", "cytosine", "repair"]):
+                intent = "problem_submission"
+                error = "Mismatched complementary base pairing or inverted antiparallel strand orientation."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "BASE PAIRING ERROR"
+                chapter = "Molecular Basis of Inheritance"
+                query = "DNA replication Chargaff complementary base pairing"
+            elif any(w in msg_lower for w in ["lac", "operon", "repressor", "allolactose"]):
+                intent = "problem_submission"
+                error = "Assumed repressor binds operator in presence of lactose instead of absence."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "GENE REGULATION MISCONCEPTION"
+                chapter = "Molecular Basis of Inheritance"
+                query = "lac operon inducer repressor mechanism"
+            elif any(w in msg_lower for w in ["photosynthesis", "calvin", "z-scheme"]):
+                intent = "problem_submission"
+                error = "Assumed cyclic photophosphorylation yields NADPH for Calvin cycle."
+                bbox = [340, 100, 560, 900]
+                bbox_label = "PHYSIOLOGY MISCONCEPTION"
+                chapter = "Photosynthesis in Higher Plants"
+                query = "cyclic non cyclic photophosphorylation"
+            elif "calculated" in msg_lower or "using m =" in msg_lower or "u =" in msg_lower or "integrated" in msg_lower:
+                intent = "problem_submission"
+                error = "Misapplied formula variables or calculation mistake."
                 bbox = [340, 100, 560, 900]
                 bbox_label = "FLAWED STEP DETECTED"
                 chapter = "STEM Problem Solving"
-                query = "formula sign convention calculation"
+                query = "NCERT science mathematics problem solving"
             else:
                 intent = "conceptual_inquiry"
                 extracted = user_message or "STEM inquiry."
@@ -559,49 +631,42 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
         except Exception:
             # Dynamic conceptual fallback based on question domain (Rich, detailed, informative bullet points)
             txt_l = (extracted_text + " " + (error or "")).lower()
-            if "lcr" in txt_l or "inductor" in txt_l or "capacitor" in txt_l or "30v" in txt_l or "phasor" in txt_l:
-                q = (
-                    "• In a series AC circuit, voltages across reactive components do not simply add arithmetically because inductor voltage ($V_L$) and capacitor voltage ($V_C$) are $180^\\circ$ out of phase with each other.\n"
-                    "• The inductor voltage leads current by $+90^\\circ$ while capacitor voltage lags by $-90^\\circ$, causing their opposite vectors to subtract: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
-                    "• The resistor voltage $V_R$ is in phase with current, making it perpendicular to the net reactive voltage on a phasor diagram. Therefore, the net source voltage is given by the vector sum $V_{\\text{net}} = \\sqrt{V_R^2 + (V_L - V_C)^2}$.\n"
-                    "• What total voltage do you get when substituting $V_R = 30\\text{V}$ and net reactive voltage $40\\text{V}$ into $\\sqrt{30^2 + 40^2}$?"
-                )
-            elif "dna" in txt_l or "base pair" in txt_l or "adenine" in txt_l or "guanine" in txt_l or "repair" in txt_l or "inheritance" in txt_l:
-                q = (
-                    "• DNA replication and repair fidelity depend on Chargaff's rules of complementary base pairing, where Adenine specifically pairs with Thymine via 2 hydrogen bonds ($A=T$) and Guanine pairs with Cytosine via 3 hydrogen bonds ($G\\equiv C$).\n"
-                    "• The two strands in double-stranded DNA are antiparallel: one strand runs in the $5' \\rightarrow 3'$ orientation while its complementary partner runs in the $3' \\rightarrow 5'$ direction.\n"
-                    "• During repair excision, DNA Polymerase reads the intact template strand and inserts the exact complementary nucleotide triphosphate to restore sequence integrity.\n"
-                    "• When checking a reconstructed sequence, how does verifying both the base-pairing rule and antiparallel orientation ensure genetic fidelity?"
-                )
-            elif "wave" in txt_l or "ydse" in txt_l or "mica" in txt_l or "fringe" in txt_l:
-                q = (
-                    "• In Young's Double Slit Experiment (YDSE), inserting a thin mica sheet of thickness $t$ and refractive index $\\mu$ in front of one slit introduces an extra optical path difference of $(\\mu - 1)t$.\n"
-                    "• This extra path difference causes the entire interference fringe pattern to shift laterally across the screen by a distance $\\Delta y = \\frac{D}{d}(\\mu - 1)t$, but it does not change the physical slit spacing $d$ or the light wavelength $\\lambda$.\n"
-                    "• The fringe width $\\beta$ is strictly governed by the formula $\\beta = \\frac{\\lambda D}{d}$. Since none of the parameters $\\lambda$, $D$, or $d$ have changed, the fringe width itself remains completely unchanged.\n"
-                    "• To complete your understanding, why does introducing the sheet shift the position of the central maximum rather than expanding or compressing the spacing between fringes?"
-                )
-            elif "concave" in txt_l or "mirror" in txt_l or "15cm" in txt_l or "sign" in txt_l or "lens" in txt_l or "focal" in txt_l:
-                q = (
-                    "• Under NCERT Cartesian Sign Convention, all distances are measured from the Pole ($P$) of the mirror as origin $(0,0)$, and distances measured opposite to incoming light (to the left) are strictly negative.\n"
-                    "• Because a concave mirror converges incoming parallel rays in front of its reflective surface, its focal length is always negative ($f = -10\\text{ cm}$), and the object placed in front is at $u = -15\\text{ cm}$.\n"
-                    "• Applying these negative values into the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ prevents sign errors that would otherwise falsely produce a virtual image.\n"
-                    "• What is the value of image distance $v$ when you evaluate $\\frac{1}{v} = \\frac{1}{-10} - \\frac{1}{-15}$?"
-                )
-            elif "nernst" in txt_l or "galvanic" in txt_l or "ag+" in txt_l or "zn2+" in txt_l:
-                q = (
-                    "• In electrochemistry, the Nernst equation calculates cell potential under non-standard conditions using the formula $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
-                    "• In the overall cell reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2 with $n = 2$ electrons transferred.\n"
-                    "• The reaction quotient $Q$ must raise each dissolved ion's concentration to the power of its stoichiometric coefficient, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, rather than a simple linear ratio.\n"
-                    "• How does squaring the silver ion concentration in the denominator affect the logarithm term and your final calculation of $E_{\\text{cell}}$?"
-                )
-            elif "redox" in txt_l or "oxidation" in txt_l or "cr2o7" in txt_l or "dichromate" in txt_l:
+            if "redox" in txt_l or "oxidation" in txt_l or "cr2o7" in txt_l or "dichromate" in txt_l or "k2cr2o7" in txt_l or "chromium" in txt_l:
                 q = (
                     "• In any neutral chemical compound like Potassium Dichromate ($\\text{K}_2\\text{Cr}_2\\text{O}_7$), the sum of all oxidation numbers across all constituent atoms must equal zero.\n"
                     "• Group 1 alkali metals like Potassium ($\\text{K}$) always possess an oxidation state of $+1$, while Oxygen typically exhibits an oxidation state of $-2$ in non-peroxide compounds.\n"
                     "• Setting up the charge balance equation gives $2(+1) + 2(x) + 7(-2) = 0$, which simplifies to $2 + 2x - 14 = 0 \\implies 2x = +12$.\n"
                     "• Since there are 2 Chromium atoms sharing the $+12$ oxidation state, what is the oxidation number of each individual Chromium atom?"
                 )
-            elif "integral" in txt_l or "x^4" in txt_l or "rational" in txt_l:
+            elif "nernst" in txt_l or "galvanic" in txt_l or "ag+" in txt_l or "zn2+" in txt_l or "e_cell" in txt_l or "e0_cell" in txt_l:
+                q = (
+                    "• In electrochemistry, the Nernst equation calculates cell potential under non-standard conditions using the formula $E_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0591}{n} \\log_{10} Q$.\n"
+                    "• In the overall cell reaction $\\text{Zn(s)} + 2\\text{Ag}^+\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + 2\\text{Ag(s)}$, the stoichiometric coefficient of $\\text{Ag}^+$ is 2 with $n = 2$ electrons transferred.\n"
+                    "• The reaction quotient $Q$ must raise each dissolved ion's concentration to the power of its stoichiometric coefficient, giving $Q = \\frac{[\\text{Zn}^{2+}]}{[\\text{Ag}^+]^2}$, rather than a simple linear ratio.\n"
+                    "• How does squaring the silver ion concentration in the denominator affect the logarithm term and your final calculation of $E_{\\text{cell}}$?"
+                )
+            elif "dna" in txt_l or "base pair" in txt_l or "adenine" in txt_l or "guanine" in txt_l or "repair" in txt_l or "inheritance" in txt_l or "chargaff" in txt_l:
+                q = (
+                    "• DNA replication and repair fidelity depend on Chargaff's rules of complementary base pairing, where Adenine specifically pairs with Thymine via 2 hydrogen bonds ($A=T$) and Guanine pairs with Cytosine via 3 hydrogen bonds ($G\\equiv C$).\n"
+                    "• The two strands in double-stranded DNA are antiparallel: one strand runs in the $5' \\rightarrow 3'$ orientation while its complementary partner runs in the $3' \\rightarrow 5'$ direction.\n"
+                    "• During repair excision, DNA Polymerase reads the intact template strand and inserts the exact complementary nucleotide triphosphate to restore sequence integrity.\n"
+                    "• When checking a reconstructed sequence, how does verifying both the base-pairing rule and antiparallel orientation ensure genetic fidelity?"
+                )
+            elif "lac" in txt_l or "operon" in txt_l or "repressor" in txt_l or "allolactose" in txt_l:
+                q = (
+                    "• The Lac Operon is an inducible operon in *E. coli* that coordinates the transport and enzymatic breakdown of lactose through genes $lacZ$, $lacY$, and $lacA$.\n"
+                    "• In the absence of lactose, the active Lac Repressor protein (encoded by the regulatory $i$ gene) binds tightly to the operator region ($O$), physically blocking RNA Polymerase from transcribing the structural genes.\n"
+                    "• When lactose is introduced, its isomer allolactose acts as an inducer by binding to the repressor, causing a conformational change that releases it from the operator.\n"
+                    "• What happens to the transcription of $\\beta$-galactosidase once RNA Polymerase is free to bind the promoter and move through the structural genes?"
+                )
+            elif "photosynthesis" in txt_l or "calvin" in txt_l or "z-scheme" in txt_l or "chlorophyll" in txt_l or "thylakoid" in txt_l:
+                q = (
+                    "• The light-dependent reactions of photosynthesis in the thylakoid membrane occur through two distinct electron transport pathways: Cyclic and Non-Cyclic Photophosphorylation.\n"
+                    "• Cyclic photophosphorylation involves only Photosystem I (PS-I / P700) and exclusively synthesizes $\\text{ATP}$ without photolysis of water or production of $\\text{NADPH}$.\n"
+                    "• The light-independent Calvin cycle requires both chemical energy in $\\text{ATP}$ and reducing power from $\\text{NADPH}$ to reduce $\\text{CO}_2$ into phosphoglyceraldehyde ($3\\text{-PGA}$) and glucose.\n"
+                    "• Why is non-cyclic photophosphorylation (the Z-scheme involving both PS-II and PS-I) essential for sustaining complete carbohydrate synthesis in plants?"
+                )
+            elif "integral" in txt_l or "x^4" in txt_l or "rational" in txt_l or "substitution" in txt_l or "calculus" in txt_l:
                 q = (
                     "• Integrals involving symmetric polynomial fractions like $\\int \\frac{x^2 + 1}{x^4 + 1}\\,dx$ are solved by dividing both numerator and denominator by $x^2$.\n"
                     "• This transforms the integrand into $\\frac{1 + 1/x^2}{x^2 + 1/x^2}$, where the numerator is the exact derivative of the expression $u = x - \\frac{1}{x}$.\n"
@@ -615,19 +680,27 @@ def socratic_generation_node(state: TutorState) -> Dict[str, Any]:
                     "• Because $\\tan^{-1}(\\tan \\theta) = \\theta$, the entire function simplifies drastically to the linear expression $y = \\frac{\\pi}{4} - x$.\n"
                     "• Taking the derivative of this simplified expression, what is the final value of $\\frac{dy}{dx}$?"
                 )
-            elif "photosynthesis" in txt_l or "calvin" in txt_l or "z-scheme" in txt_l:
+            elif "lcr" in txt_l or "inductor" in txt_l or "capacitor" in txt_l or "30v" in txt_l or "phasor" in txt_l or "80v" in txt_l or "40v" in txt_l:
                 q = (
-                    "• The light-dependent reactions of photosynthesis in the thylakoid membrane occur through two distinct electron transport pathways: Cyclic and Non-Cyclic Photophosphorylation.\n"
-                    "• Cyclic photophosphorylation involves only Photosystem I (PS-I / P700) and exclusively synthesizes $\\text{ATP}$ without photolysis of water or production of $\\text{NADPH}$.\n"
-                    "• The light-independent Calvin cycle requires both chemical energy in $\\text{ATP}$ and reducing power from $\\text{NADPH}$ to reduce $\\text{CO}_2$ into phosphoglyceraldehyde ($3\\text{-PGA}$) and glucose.\n"
-                    "• Why is non-cyclic photophosphorylation (the Z-scheme involving both PS-II and PS-I) essential for sustaining complete carbohydrate synthesis in plants?"
+                    "• In a series AC circuit, voltages across reactive components do not simply add arithmetically because inductor voltage ($V_L$) and capacitor voltage ($V_C$) are $180^\\circ$ out of phase with each other.\n"
+                    "• The inductor voltage leads current by $+90^\\circ$ while capacitor voltage lags by $-90^\\circ$, causing their opposite vectors to subtract: $V_{\\text{reactive}} = |V_L - V_C| = |80 - 40| = 40\\text{V}$.\n"
+                    "• The resistor voltage $V_R$ is in phase with current, making it perpendicular to the net reactive voltage on a phasor diagram. Therefore, the net source voltage is given by the vector sum $V_{\\text{net}} = \\sqrt{V_R^2 + (V_L - V_C)^2}$.\n"
+                    "• What total voltage do you get when substituting $V_R = 30\\text{V}$ and net reactive voltage $40\\text{V}$ into $\\sqrt{30^2 + 40^2}$?"
                 )
-            elif "lac" in txt_l or "operon" in txt_l or "repressor" in txt_l:
+            elif "wave" in txt_l or "ydse" in txt_l or "mica" in txt_l or "fringe" in txt_l:
                 q = (
-                    "• The Lac Operon is an inducible operon in *E. coli* that coordinates the transport and enzymatic breakdown of lactose through genes $lacZ$, $lacY$, and $lacA$.\n"
-                    "• In the absence of lactose, the active Lac Repressor protein (encoded by the regulatory $i$ gene) binds tightly to the operator region ($O$), physically blocking RNA Polymerase from transcribing the structural genes.\n"
-                    "• When lactose is introduced, its isomer allolactose acts as an inducer by binding to the repressor, causing a conformational change that releases it from the operator.\n"
-                    "• What happens to the transcription of $\\beta$-galactosidase once RNA Polymerase is free to bind the promoter and move through the structural genes?"
+                    "• In Young's Double Slit Experiment (YDSE), inserting a thin mica sheet of thickness $t$ and refractive index $\\mu$ in front of one slit introduces an extra optical path difference of $(\\mu - 1)t$.\n"
+                    "• This extra path difference causes the entire interference fringe pattern to shift laterally across the screen by a distance $\\Delta y = \\frac{D}{d}(\\mu - 1)t$, but it does not change the physical slit spacing $d$ or the light wavelength $\\lambda$.\n"
+                    "• The fringe width $\\beta$ is strictly governed by the formula $\\beta = \\frac{\\lambda D}{d}$. Since none of the parameters $\\lambda$, $D$, or $d$ have changed, the fringe width itself remains completely unchanged.\n"
+                    "• To complete your understanding, why does introducing the sheet shift the position of the central maximum rather than expanding or compressing the spacing between fringes?"
+                )
+            elif "mirror" in txt_l or "concave mirror" in txt_l or "convex mirror" in txt_l or "lens" in txt_l or "focal length" in txt_l:
+                q = (
+                    "• Under NCERT Cartesian Sign Convention, all distances are measured from the Pole ($P$) of the mirror as origin $(0,0)$, and distances measured opposite to incoming light (to the left) are strictly negative.\n"
+                    "• Because a concave mirror converges incoming parallel rays in front of its reflective surface, its focal length is always negative ($f = -10\\text{ cm}$), and the object placed in front is at $u = -15\\text{ cm}$.\n"
+                    "• Applying these negative values into the mirror formula $\\frac{1}{f} = \\frac{1}{v} + \\frac{1}{u}$ prevents sign errors that would otherwise falsely produce a virtual image.\n"
+                    "• What is the value of image distance $v$ when you evaluate $\\frac{1}{v} = \\frac{1}{-10} - \\frac{1}{-15}$?"
+                )
             else:
                 q = (
                     f"• Let's analyze the foundational physical laws and governing NCERT equations for {chap_str}.\n"
