@@ -45,12 +45,47 @@ In 2026, most AI educational tools (ChatGPT, Photomath, Doubtnut) act as **answe
 
 ---
 
+## 🤖 AI Technologies & Models Used
+
+SOCRATIC//STEM integrates a multi-layered AI stack combining state-of-the-art multimodal foundation models, agentic state-machine workflows, and self-correcting retrieval architectures:
+
+```
+                                    AI ARCHITECTURE & AGENT PIPELINE
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  🧑‍🎓 Student Input (Handwritten Photo / Formula / Query)                                                 │
+│       │                                                                                                 │
+│  [1. Google Gemini Multimodal Vision OCR] ───► Spatial Bounding Box Detection ([ymin, xmin, ymax, xmax])│
+│       │                                                                                                 │
+│  [2. LangGraph State Machine] ───────────────► 5-Node Agentic Execution Loop                             │
+│       │                                                                                                 │
+│  [3. Pinecone Serverless Vector DB] ─────────► Semantic NCERT Textbook Chunk Retrieval (Physics/Chem/Math)│
+│       │                                                                                                 │
+│  [4. Corrective RAG (CRAG) Grader] ──────────► Self-Reflective Document Relevance Scoring               │
+│       ├── Valid Context  ────────────────────► [5. Gemini Socratic Non-Solver Generation]               │
+│       └── Low Relevance  ────────────────────► [Autonomous Query Rewrite Node] ──► Re-Retrieve          │
+│                                                                                                         │
+│  🎯 Output: 3-Bullet Socratic Guidance (LaTeX) + Interactive SVG Visualizer + Audio Viva Voice Narration│
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+| AI Component / Technology | Model / Framework | Role & Architectural Purpose |
+| :--- | :--- | :--- |
+| **Multimodal Foundation LLMs** | **Google Gemini 3.1 Flash-Lite**<br>**Google Gemini 3.6 / 2.5 Flash** | • High-speed, sub-second multimodal vision OCR for handwritten notes.<br>• LaTeX mathematical formula transcription & equation parsing.<br>• Tiered multi-model failover cascade with zero-downtime offline fallback. |
+| **Agentic Multi-Agent Orchestrator** | **LangGraph StateGraph**<br>**LangChain Core** | • Stateful cyclic reasoning graph with 5 decoupled nodes (`vision_parser`, `retriever`, `grader`, `query_rewrite`, `socratic_generator`).<br>• Real-time animated telemetry streaming to the UI thinking HUD. |
+| **Corrective RAG (CRAG) Engine** | **Pinecone Serverless**<br>`ncert-class-10` on AWS | • Cloud vector database storing dense vector embeddings of NCERT textbooks.<br>• Self-evaluates retrieved chunks to eliminate AI hallucinations. |
+| **Spatial Error Computer Vision** | **Gemini Coordinate Regression** | • Detects normalized $[y_{\min}, x_{\min}, y_{\max}, x_{\max}]$ coordinates on student notebook photos.<br>• Renders glowing neon HUD bounding boxes over the exact faulty line. |
+| **Interactive Domain Simulators** | **Custom SVG & Canvas Engines** | • Real-time interactive diagrams (Optics ray tracing, AC Phasors, YDSE fringe shifts, Nernst cell potentials, $K_2Cr_2O_7$ Redox charge balance, Lac Operon, Photosynthesis Z-scheme). |
+| **Voice Viva Synthesis** | **Web Speech API** | • Real-time auditory viva explanations and speech synthesis in Indian languages. |
+| **Diagnostic Analytics & Remedial Engine** | **Misconception Clustering AI** | • Clusters student homework mistakes into real-time teacher diagnostic charts.<br>• 1-Click generation of counterfactual paradox worksheets. |
+
+---
+
 ## 🛠️ Complete Tech Stack
 
 * **Frontend**: React 18 (TypeScript) + Vite + KaTeX + Lucide Icons + CSS3 Glassmorphism
 * **Backend API**: Python FastAPI + Uvicorn ASGI Server
 * **Agentic Brain**: LangGraph StateGraph + LangChain Core
-* **Vision & Reasoning**: Google Gemini 3.6 Flash / 3.5 Flash (`google-genai` SDK)
+* **Vision & Reasoning**: Google Gemini 3.1 Flash-Lite / 2.5 Flash / 3.6 Flash (`google-genai` SDK)
 * **Vector Database**: Pinecone Serverless Index (`ncert-class-10` on AWS `us-east-1`)
 * **Document Parsing**: PyPDF + Gemini Multimodal Vision
 * **Hosting**: Firebase Hosting (Frontend CDN) + Render / Cloud Run (Backend API)
