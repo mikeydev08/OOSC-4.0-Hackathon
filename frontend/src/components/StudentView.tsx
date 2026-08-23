@@ -871,31 +871,35 @@ export const StudentView: React.FC<StudentViewProps> = ({ presets = DEFAULT_PRES
                           {isBulleted ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
                               {lines.map((line, lIdx) => {
-                                const formattedLine = line.replace(/^[•\-\*]\s*/, '');
-                                const dotColor = lIdx === 0 ? 'var(--neon-cyan)' : lIdx === 1 ? 'var(--neon-purple)' : 'var(--neon-emerald)';
+                                const formattedLine = line
+                                  .replace(/^[•\-\*]\s*/, '')
+                                  .replace(/^\*\*(?:Key Concept|Helpful Clue|Next Step|Note|Summary)\*\*:\s*/gi, '')
+                                  .trim();
+                                const colors = ['var(--neon-cyan)', 'var(--neon-purple)', 'var(--neon-emerald)', '#d4ff00', '#38bdf8'];
+                                const dotColor = colors[lIdx % colors.length];
                                 return (
                                   <div
                                     key={lIdx}
                                     style={{
                                       display: 'flex',
                                       alignItems: 'flex-start',
-                                      gap: '12px',
-                                      background: 'rgba(255, 255, 255, 0.03)',
-                                      border: '1px solid rgba(255, 255, 255, 0.07)',
+                                      gap: '14px',
+                                      background: 'rgba(255, 255, 255, 0.025)',
+                                      border: '1px solid rgba(255, 255, 255, 0.06)',
                                       borderRadius: '14px',
-                                      padding: '12px 16px'
+                                      padding: '12px 18px'
                                     }}
                                   >
                                     <div style={{
-                                      width: '8px',
-                                      height: '8px',
+                                      width: '7px',
+                                      height: '7px',
                                       borderRadius: '50%',
                                       background: dotColor,
-                                      marginTop: '7px',
+                                      marginTop: '9px',
                                       flexShrink: 0,
-                                      boxShadow: `0 0 10px ${dotColor}`
+                                      boxShadow: `0 0 8px ${dotColor}`
                                     }} />
-                                    <div style={{ fontSize: '1.04rem', color: 'var(--ice-white)', lineHeight: 1.6, flex: 1, fontWeight: 500 }}>
+                                    <div style={{ fontSize: '1.02rem', color: 'var(--ice-white)', lineHeight: 1.65, flex: 1, fontWeight: 450 }}>
                                       <MathText text={formattedLine} />
                                     </div>
                                   </div>
